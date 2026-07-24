@@ -1,0 +1,192 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: deviceflow
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: deviceflow-config
+  namespace: deviceflow
+data:
+  DJANGO_SETTINGS_MODULE: config.settings.production
+  CHANNELS_USE_REDIS: "true"
+  CELERY_TASK_ALWAYS_EAGER: "false"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: deviceflow-secrets
+  namespace: deviceflow
+type: Opaque
+stringData:
+  SECRET_KEY: change-me-in-prod
+  DATABASE_URL: postgres://deviceflow:deviceflow@postgres:5432/deviceflow
+  REDIS_URL: redis://redis:6379/0
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: deviceflow-migrate
+  namespace: deviceflow
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: deviceflow-api:latest
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          envFrom:
+            - configMapRef:
+                name: deviceflow-config
+            - secretRef:
+                name: deviceflow-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deviceflow-api
+  namespace: deviceflow
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: deviceflow-api
+  template:
+    metadata:
+      labels:
+        app: deviceflow-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: api
+          image: deviceflow-api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: deviceflow-config
+            - secretRef:
+                name: deviceflow-secrets
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: deviceflow-api
+  namespace: deviceflow
+spec:
+  selector:
+    app: deviceflow-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deviceflow-worker
+  namespace: deviceflow
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: deviceflow-worker
+  template:
+    metadata:
+      labels:
+        app: deviceflow-worker
+    spec:
+      containers:
+        - name: worker
+          image: deviceflow-api:latest
+          command: ["celery", "-A", "config", "worker", "-l", "INFO"]
+          envFrom:
+            - configMapRef:
+                name: deviceflow-config
+            - secretRef:
+                name: deviceflow-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deviceflow-beat
+  namespace: deviceflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deviceflow-beat
+  template:
+    metadata:
+      labels:
+        app: deviceflow-beat
+    spec:
+      containers:
+        - name: beat
+          image: deviceflow-api:latest
+          command: ["celery", "-A", "config", "beat", "-l", "INFO"]
+          envFrom:
+            - configMapRef:
+                name: deviceflow-config
+            - secretRef:
+                name: deviceflow-secrets
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: deviceflow-api
+  namespace: deviceflow
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: deviceflow-api
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: deviceflow-api
+  namespace: deviceflow
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: deviceflow-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

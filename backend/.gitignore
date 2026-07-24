@@ -1,0 +1,31 @@
+# DeviceFlow backend (stack-specific; root .gitignore also applies)
+
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local DB & runtime
+*.sqlite3
+db.sqlite3
+db.sqlite3-*
+staticfiles/
+media/
+celerybeat-schedule
+celerybeat-schedule.*
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Packaging
+*.egg-info/
+dist/
+build/
+
+# Local env (prefer repo-root .env)
+.env
+!.env.example

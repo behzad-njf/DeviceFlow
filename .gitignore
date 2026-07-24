@@ -1,0 +1,53 @@
+# DeviceFlow (monorepo root)
+
+# Secrets & local env
+.env
+!.env.example
+**/.env
+!**/.env.example
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dashboard/dist/
+dashboard/dist-ssr/
+prompts/
+# Django / backend runtime
+backend/db.sqlite3
+backend/db.sqlite3-*
+backend/staticfiles/
+backend/media/
+backend/celerybeat-schedule
+backend/celerybeat-schedule.*
+
+# Android
+*.apk
+*.aab
+android-agent/local.properties
+android-agent/.gradle/
+android-agent/.kotlin/
+android-agent/**/build/
+android-agent/captures/
+android-agent/.cxx/
+

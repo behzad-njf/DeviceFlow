@@ -1,0 +1,25 @@
+DeviceFlow
+Copyright 2026 Behzad
+
+This product includes software developed for DeviceFlow.
+Original source repository (required attribution):
+  https://github.com/behzad-njf/DeviceFlow
+
+Attribution requirement
+-----------------------
+If you use, copy, modify, host, redistribute, or build upon DeviceFlow
+(including forks, private deployments, SaaS wrappers, or apps that embed
+this software), you must give clear credit to the original project by
+keeping this NOTICE and mentioning the source repository above in at least
+one of:
+
+  • your project's README or documentation, and/or
+  • an about / credits screen in your product UI, and/or
+  • a NOTICE file shipped with your distribution
+
+Suggested credit line:
+
+  Based on DeviceFlow — https://github.com/behzad-njf/DeviceFlow
+
+Do not remove or obscure this attribution.
+See the Apache License 2.0 (LICENSE) for the full legal terms.

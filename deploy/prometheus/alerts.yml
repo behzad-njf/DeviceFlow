@@ -1,0 +1,29 @@
+groups:
+  - name: deviceflow
+    rules:
+      - alert: DeviceFlowNoOnlineDevices
+        expr: deviceflow_devices_online == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: No online DeviceFlow agents
+      - alert: DeviceFlowHighFailRate
+        expr: |
+          (
+            sum(rate(deviceflow_messages_failed_total[15m]))
+            /
+            clamp_min(sum(rate(deviceflow_messages_sent_total[15m])) + sum(rate(deviceflow_messages_failed_total[15m])), 0.001)
+          ) > 0.10
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Message fail ratio > 10%
+      - alert: DeviceFlowQueueBacklog
+        expr: deviceflow_queue_depth > 10000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Outbound queue depth is high

@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DeviceFlow Agent</string>
+
+    <string name="home_title">DeviceFlow</string>
+    <string name="home_subtitle">SMS gateway agent · v%1$s</string>
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
+    <string name="status_service_on">Service on</string>
+    <string name="status_synced">Synced</string>
+    <string name="status_not_synced">Not synced</string>
+    <string name="stat_sent">Sent</string>
+    <string name="stat_failed">Failed</string>
+    <string name="stat_received">Received</string>
+    <string name="home_service_title">Agent service</string>
+    <string name="home_service_running">Foreground service is running and polling the server.</string>
+    <string name="home_service_stopped">Service is stopped. Start it to send/receive SMS for the dashboard.</string>
+    <string name="home_last_sync">Last sync: %1$s</string>
+    <string name="home_recent_title">Last 10 messages</string>
+    <string name="home_recent_empty">No local messages yet. Outbound and inbound SMS will appear here.</string>
+    <string name="home_setup_title">Setup &amp; help</string>
+    <string name="msg_out">OUT</string>
+    <string name="msg_in">IN</string>
+    <string name="start_agent">Start service</string>
+    <string name="stop_agent">Stop service</string>
+    <string name="refresh_status">Refresh</string>
+    <string name="unpair">Unpair device</string>
+    <string name="status_unpaired">Not paired</string>
+    <string name="nav_permissions">Permissions</string>
+    <string name="nav_battery">Battery optimization</string>
+    <string name="nav_help">Help</string>
+    <string name="nav_messages">All messages</string>
+    <string name="nav_security">App security</string>
+    <string name="action_back">Back</string>
+    <string name="open_app_settings">Open app settings</string>
+    <string name="notif_channel">DeviceFlow Agent</string>
+    <string name="notif_running">Agent running — keeping this phone online</string>
+
+    <string name="pairing_title">Pair this phone</string>
+    <string name="pairing_subtitle">Enter your DeviceFlow server URL and the pairing code from the dashboard.</string>
+    <string name="server_url">Server URL</string>
+    <string name="pairing_code">Pairing code</string>
+    <string name="pair_action">Pair device</string>
+    <string name="pairing_in_progress">Pairing…</string>
+    <string name="pairing_failed">Pairing failed: %1$s</string>
+
+    <string name="permissions_intro_title">About permissions</string>
+    <string name="permissions_intro_body">DeviceFlow needs phone permissions to send/receive SMS, run USSD, and stay online. Grant them now, or open Settings if Android blocked a prompt.</string>
+    <string name="permissions_intro_read">Open permissions</string>
+    <string name="permissions_intro_later">Not now</string>
+
+    <string name="permissions_title">Permissions</string>
+    <string name="permissions_intro">Grant each permission so this phone can act as a reliable SMS gateway. Denied items can be fixed by tapping Grant again or opening Settings.</string>
+    <string name="permissions_grant_all">Grant missing permissions</string>
+    <string name="perm_grant">Grant</string>
+    <string name="perm_settings">Settings</string>
+    <string name="perm_status_granted">Granted</string>
+    <string name="perm_status_missing">Missing</string>
+    <string name="perm_label_why">Why we need it</string>
+    <string name="perm_label_if_denied">If you deny it</string>
+
+    <string name="perm_sms_send_title">Send SMS</string>
+    <string name="perm_sms_send_why">Lets the agent send outbound messages queued from the dashboard or API.</string>
+    <string name="perm_sms_send_denied">Outbound SMS from DeviceFlow will fail.</string>
+
+    <string name="perm_sms_receive_title">Receive SMS</string>
+    <string name="perm_sms_receive_why">Lets the agent capture inbound SMS and forward them to DeviceFlow.</string>
+    <string name="perm_sms_receive_denied">Inbound messages will not reach the dashboard.</string>
+
+    <string name="perm_sms_read_title">Read SMS</string>
+    <string name="perm_sms_read_why">Helps confirm message state while the agent runs as a gateway.</string>
+    <string name="perm_sms_read_denied">Some inbound sync and status checks may be incomplete.</string>
+
+    <string name="perm_phone_state_title">Phone / SIM state</string>
+    <string name="perm_phone_state_why">Reads SIM slots, operator, and signal for health and routing.</string>
+    <string name="perm_phone_state_denied">SIM details and multi-SIM routing will be missing or wrong.</string>
+
+    <string name="perm_call_phone_title">Phone calls (USSD)</string>
+    <string name="perm_call_phone_why">Required by Android to run USSD codes (for example balance *141#).</string>
+    <string name="perm_call_phone_denied">Remote USSD commands will fail.</string>
+
+    <string name="perm_contacts_title">Contacts</string>
+    <string name="perm_contacts_why">Lets the dashboard import this phone\'s phonebook.</string>
+    <string name="perm_contacts_denied">Import from device will fail until Contacts is granted.</string>
+
+    <string name="perm_phone_numbers_title">Phone numbers</string>
+    <string name="perm_phone_numbers_why">Reads each SIM number so the dashboard can label dual-SIM slots.</string>
+    <string name="perm_phone_numbers_denied">SIM numbers stay blank in the dashboard.</string>
+
+    <string name="perm_notifications_title">Notifications</string>
+    <string name="perm_notifications_why">Keeps the foreground agent service visible so Android does not kill it.</string>
+    <string name="perm_notifications_denied">The agent may be stopped in the background.</string>
+
+    <string name="perm_network_title">Internet &amp; network state</string>
+    <string name="perm_network_why">Connects to your DeviceFlow server for pairing, heartbeats, and SMS status.</string>
+    <string name="perm_network_denied">The agent cannot reach the server.</string>
+
+    <string name="perm_location_title">Location</string>
+    <string name="perm_location_why">Reports GPS so the dashboard map can show this gateway.</string>
+    <string name="perm_location_denied">The device will not appear on the map.</string>
+
+    <string name="perm_ussd_a11y_title">Accessibility (USSD reply capture)</string>
+    <string name="perm_ussd_a11y_why">On Xiaomi/MIUI, Accessibility lets DeviceFlow read carrier USSD replies.</string>
+    <string name="perm_ussd_a11y_denied">USSD may run on-screen without returning the reply to the dashboard.</string>
+
+    <string name="ussd_host_status">DeviceFlow is dialing USSD:\n%1$s</string>
+    <string name="ussd_a11y_description">Reads on-screen USSD / MMI dialogs so DeviceFlow can show carrier replies in the dashboard.</string>
+    <string name="open_ussd_accessibility">Open Accessibility settings</string>
+    <string name="ussd_accessibility_hint">Xiaomi tip: enable Settings → Accessibility → DeviceFlow USSD.</string>
+
+    <string name="battery_title">Battery optimization</string>
+    <string name="battery_intro">Android may pause background apps to save battery. SMS gateways need an exception so heartbeats and sending keep working.</string>
+    <string name="battery_unrestricted">Unrestricted</string>
+    <string name="battery_restricted">Optimized / restricted</string>
+    <string name="battery_why_title">Why this matters</string>
+    <string name="battery_why_body">If the system optimizes DeviceFlow, the agent can stop polling. The dashboard will show this phone offline even when it has signal.</string>
+    <string name="battery_request">Allow unrestricted battery</string>
+    <string name="battery_open_settings">Open battery optimization list</string>
+    <string name="battery_oem_title">Xiaomi / Samsung / Oppo tips</string>
+    <string name="battery_oem_body">Also check Autostart, \"Allow background activity\", and lock DeviceFlow in Recents so OEM cleaners do not kill the agent.</string>
+
+    <string name="help_title">Help</string>
+    <string name="help_intro">Short guides for pairing, keeping the agent online, dual-SIM phones, and common fixes.</string>
+    <string name="help_started_title">Getting started</string>
+    <string name="help_started_blurb">Pair with the dashboard and start the agent service.</string>
+    <string name="help_started_body">1. Open the DeviceFlow dashboard and create a pairing code.\n2. Enter your server URL and the code here.\n3. Grant SMS, Phone, and Notifications permissions.\n4. Start the agent service and confirm Online / Synced on the home screen.\n5. Attach this phone to a project, then send a test SMS.</string>
+    <string name="help_online_title">Keep the agent online</string>
+    <string name="help_online_blurb">Battery, autostart, and the foreground notification.</string>
+    <string name="help_online_body">Leave the agent service running. Disable battery optimization for DeviceFlow. On Xiaomi, enable Autostart and lock the app in Recents. Do not swipe away the ongoing notification — it means the gateway is alive.</string>
+    <string name="help_dualsim_title">Dual-SIM phones</string>
+    <string name="help_dualsim_blurb">How SIMs appear in the dashboard.</string>
+    <string name="help_dualsim_body">Grant Phone / Phone numbers permissions so both SIMs are reported. The dashboard can pick a SIM when sending or running USSD. Refresh SIMs from the device detail page if a SIM was swapped.</string>
+    <string name="help_trouble_title">Troubleshooting</string>
+    <string name="help_trouble_blurb">Offline, not synced, or SMS failing.</string>
+    <string name="help_trouble_body">• Offline: start the service and check internet.\n• Not synced: verify server URL and that the phone can reach it.\n• SMS failed: grant Send SMS and check prepaid balance / SIM.\n• USSD empty reply: enable Accessibility for DeviceFlow.\n• Contacts import: grant Contacts permission and rebuild the app if needed.\n• Hidden icon: dial *#*#CODE#*#* in the Phone app (CODE is set in App security / dashboard), or Show from the dashboard.\n• Locked UI: enter your passcode, or Unlock / Clear passcode from the dashboard.</string>
+
+    <string name="help_security_title">Hide icon &amp; passcode</string>
+    <string name="help_security_blurb">Hide from the app drawer and lock the agent UI.</string>
+    <string name="help_security_body">Hide launcher removes DeviceFlow from the app list. To open it again, dial *#*#CODE#*#* in the Phone dialer (default CODE is 3323; customize in App security or the dashboard). A passcode locks the UI only — SMS and heartbeats keep running.</string>
+
+    <string name="lock_title">Locked</string>
+    <string name="lock_subtitle">Enter your DeviceFlow passcode</string>
+    <string name="lock_passcode">Passcode</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_wrong">Incorrect passcode</string>
+    <string name="lock_enter_hint">Enter 4–8 digit passcode</string>
+    <string name="lock_backspace">Delete</string>
+    <string name="lock_ok">OK</string>
+    <string name="lock_agent_running">Agent service keeps running while locked</string>
+    <string name="home_lock_cd">Lock app</string>
+    <string name="home_lock_setup_cd">Set up passcode</string>
+
+    <string name="security_title">App security</string>
+    <string name="security_subtitle">Hide the launcher icon and protect the UI with a passcode. SMS gateway work continues in the background.</string>
+    <string name="security_launcher_title">Launcher icon</string>
+    <string name="security_launcher_hidden">Hidden from app list</string>
+    <string name="security_launcher_visible">Visible in app list</string>
+    <string name="security_dialer_hint">When hidden, open by dialing *#*#%1$s#*#* in the Phone app.</string>
+    <string name="security_dialer_code_label">Secret dialer code</string>
+    <string name="security_dialer_format">Dial as *#*#%1$s#*#*</string>
+    <string name="security_dialer_save">Save dialer code</string>
+    <string name="security_dialer_saved">Dialer code saved. Use *#*#%1$s#*#*</string>
+    <string name="security_dialer_invalid">Use 3–8 digits</string>
+    <string name="security_hide_launcher">Hide from app list</string>
+    <string name="security_show_launcher">Show in app list</string>
+    <string name="security_launcher_hidden_msg">Icon hidden. Dial *#*#%1$s#*#* to reopen.</string>
+    <string name="security_launcher_shown_msg">Launcher icon restored.</string>
+    <string name="security_passcode_title">Passcode</string>
+    <string name="security_passcode_on">Passcode enabled</string>
+    <string name="security_passcode_off">No passcode</string>
+    <string name="security_current_passcode">Current passcode</string>
+    <string name="security_new_passcode">New passcode (4–8 digits)</string>
+    <string name="security_confirm_passcode">Confirm passcode</string>
+    <string name="security_set_passcode">Set passcode</string>
+    <string name="security_change_passcode">Change passcode</string>
+    <string name="security_lock_now">Lock now</string>
+    <string name="security_clear_passcode">Clear passcode</string>
+    <string name="security_pin_mismatch">Passcodes do not match</string>
+    <string name="security_pin_invalid">Use 4–8 digits</string>
+    <string name="security_pin_saved">Passcode saved — app is locked</string>
+    <string name="security_pin_cleared">Passcode cleared</string>
+
+    <string name="messages_title">Message history</string>
+    <string name="messages_subtitle">Showing %1$d of %2$d stored on this phone</string>
+    <string name="messages_search">Search phone or text</string>
+    <string name="messages_filter_direction">Direction</string>
+    <string name="messages_filter_status">Status</string>
+    <string name="messages_filter_date">Date range</string>
+    <string name="messages_filter_all">All</string>
+    <string name="messages_status_sent">Sent</string>
+    <string name="messages_status_failed">Failed</string>
+    <string name="messages_status_received">Received</string>
+    <string name="messages_from_date">From date</string>
+    <string name="messages_to_date">To date</string>
+    <string name="messages_from_date_value">From %1$s</string>
+    <string name="messages_to_date_value">To %1$s</string>
+    <string name="messages_clear_filters">Clear filters</string>
+    <string name="messages_clear_history">Clear history</string>
+    <string name="messages_empty">No messages match these filters.</string>
+</resources>

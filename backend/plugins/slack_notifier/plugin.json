@@ -1,0 +1,15 @@
+{
+  "id": "slack-notifier",
+  "name": "Slack Notifier",
+  "version": "1.0.0",
+  "plugin_api": "1.0",
+  "entry": "plugin.py",
+  "hooks": ["notification.channel", "inbound.handler", "outbound.lifecycle"],
+  "config_schema": {
+    "type": "object",
+    "properties": {
+      "webhook_url": { "type": "string", "description": "Incoming Slack webhook URL" }
+    },
+    "required": ["webhook_url"]
+  }
+}

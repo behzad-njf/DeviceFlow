@@ -1,0 +1,73 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "transparent",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Messages enqueued rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(deviceflow_messages_enqueued_total[5m]))",
+          "legendFormat": "enqueued/s"
+        }
+      ]
+    },
+    {
+      "title": "Sent vs failed",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(deviceflow_messages_sent_total[5m]))",
+          "legendFormat": "sent/s"
+        },
+        {
+          "expr": "sum(rate(deviceflow_messages_failed_total[5m]))",
+          "legendFormat": "failed/s"
+        }
+      ]
+    },
+    {
+      "title": "Devices online / offline",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "deviceflow_devices_online", "legendFormat": "online" },
+        { "expr": "deviceflow_devices_offline", "legendFormat": "offline" }
+      ]
+    },
+    {
+      "title": "Queue depth",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 8 },
+      "targets": [
+        { "expr": "deviceflow_queue_depth", "legendFormat": "pending" }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["deviceflow"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "browser",
+  "title": "DeviceFlow Overview",
+  "uid": "deviceflow-overview",
+  "version": 1
+}
