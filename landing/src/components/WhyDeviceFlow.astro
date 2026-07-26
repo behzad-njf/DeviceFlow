@@ -1,0 +1,64 @@
+---
+import { whyItems } from '../data/content';
+---
+
+<section class="section why" id="why" aria-labelledby="why-title">
+  <div class="wrap">
+    <header class="why__head reveal">
+      <p class="section__eyebrow">Why DeviceFlow</p>
+      <h2 id="why-title" class="section__title">Control the path. Keep the license clean.</h2>
+      <p class="section__lead">
+        A self-hosted alternative to pure SaaS SMS vendors—API-first, open source, and attribution-friendly under Apache 2.0.
+      </p>
+    </header>
+
+    <div class="why__grid">
+      {
+        whyItems.map((item) => (
+          <article class="why-item reveal">
+            <h3 class="why-item__title">{item.title}</h3>
+            <p class="why-item__desc">{item.description}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .why__head {
+    margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+  }
+
+  .why__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .why-item {
+    padding: 1.35rem 1.4rem;
+    border-radius: var(--radius-lg);
+    background: var(--white);
+    border: 1px solid rgba(15, 118, 110, 0.12);
+    border-left: 4px solid var(--teal-600);
+  }
+
+  .why-item__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+  }
+
+  .why-item__desc {
+    margin: 0.5rem 0 0;
+    color: var(--slate-600);
+  }
+
+  @media (max-width: 640px) {
+    .why__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

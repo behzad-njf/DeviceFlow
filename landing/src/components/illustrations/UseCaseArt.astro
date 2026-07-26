@@ -1,0 +1,106 @@
+---
+interface Props {
+  art: 'auth' | 'commerce' | 'alerts' | 'ussd' | 'multisim' | 'selfhost';
+}
+
+const { art } = Astro.props;
+
+const labels = {
+  auth: 'Lock and OTP for two-factor authentication',
+  commerce: 'Shopping bag with order SMS',
+  alerts: 'Bell alert for ops notifications',
+  ussd: 'Star-hash USSD code on a handset',
+  multisim: 'Globe with dual SIM routes',
+  selfhost: 'Server rack you control versus cloud SaaS',
+} as const;
+---
+
+<svg class="use-art" viewBox="0 0 180 120" role="img" aria-label={labels[art]} xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="120" rx="16" fill="#F0FDFA" />
+  <circle cx="150" cy="24" r="22" fill="#CCFBF1" opacity="0.65" />
+
+  {
+    art === 'auth' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="58" y="42" width="64" height="48" rx="10" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <path d="M78 42v-8a12 12 0 0 1 24 0v8" stroke="#0F766E" stroke-width="2.5" />
+        <circle cx="90" cy="66" r="8" fill="#0F766E" />
+        <rect x="86" y="66" width="8" height="12" rx="2" fill="#0D5C56" />
+        <rect x="118" y="28" width="40" height="22" rx="8" fill="#0F766E" />
+        <text x="138" y="43" text-anchor="middle" fill="#fff" font-size="10" font-family="ui-monospace,monospace" font-weight="700">
+          OTP
+        </text>
+      </g>
+    )
+  }
+  {
+    art === 'commerce' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M62 48h56l-6 40H68z" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <path d="M78 48v-8a12 12 0 0 1 24 0v8" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="108" y="70" width="48" height="28" rx="8" fill="#0D5C56" />
+        <text x="132" y="88" text-anchor="middle" fill="#fff" font-size="9" font-family="ui-sans-serif,sans-serif" font-weight="700">
+          Shipped
+        </text>
+      </g>
+    )
+  }
+  {
+    art === 'alerts' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M90 28c16 0 28 12 28 28v16l10 14H52l10-14V56c0-16 12-28 28-28z" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <path d="M80 90a10 10 0 0 0 20 0" stroke="#0F766E" stroke-width="2.5" />
+        <circle cx="118" cy="40" r="10" fill="#D9776A" />
+        <text x="118" y="44" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">
+          !
+        </text>
+      </g>
+    )
+  }
+  {
+    art === 'ussd' && (
+      <g fill="none" stroke-linecap="round">
+        <rect x="66" y="18" width="48" height="84" rx="10" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="74" y="30" width="32" height="18" rx="4" fill="#F0FDFA" stroke="#0F766E" stroke-width="1.5" />
+        <text x="90" y="43" text-anchor="middle" fill="#0D5C56" font-size="10" font-family="ui-monospace,monospace" font-weight="700">
+          *141#
+        </text>
+        <rect x="76" y="58" width="12" height="10" rx="2" fill="#CCFBF1" />
+        <rect x="92" y="58" width="12" height="10" rx="2" fill="#CCFBF1" />
+        <rect x="76" y="72" width="12" height="10" rx="2" fill="#CCFBF1" />
+        <rect x="92" y="72" width="12" height="10" rx="2" fill="#0F766E" />
+      </g>
+    )
+  }
+  {
+    art === 'multisim' && (
+      <g fill="none" stroke-linecap="round">
+        <circle cx="90" cy="60" r="28" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <ellipse cx="90" cy="60" rx="12" ry="28" stroke="#0F766E" stroke-width="2" />
+        <path d="M62 60h56M70 42h40M70 78h40" stroke="#0F766E" stroke-width="1.5" opacity="0.5" />
+        <rect x="28" y="48" width="22" height="28" rx="4" fill="#0F766E" />
+        <rect x="130" y="48" width="22" height="28" rx="4" fill="#0D5C56" />
+      </g>
+    )
+  }
+  {
+    art === 'selfhost' && (
+      <g fill="none" stroke-linecap="round">
+        <rect x="28" y="30" width="54" height="64" rx="8" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="36" y="42" width="38" height="10" rx="2" fill="#0F766E" />
+        <rect x="36" y="58" width="38" height="10" rx="2" fill="#CCFBF1" />
+        <rect x="36" y="74" width="38" height="10" rx="2" fill="#CCFBF1" />
+        <path d="M96 62h16" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 3" />
+        <rect x="112" y="40" width="44" height="44" rx="22" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 3" />
+        <path d="M124 62h20M134 52v20" stroke="#94A3B8" stroke-width="2" />
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .use-art {
+    width: 100%;
+    height: auto;
+  }
+</style>

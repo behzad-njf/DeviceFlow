@@ -1,0 +1,212 @@
+---
+import { guideSteps } from '../data/content';
+import GuideArt from './illustrations/GuideArt.astro';
+
+const curlExample = `$ curl -X POST https://api.example/api/v1/messages/ \\
+  -H "Authorization: Bearer pk_live_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "to": "+15551234567",
+    "body": "Your code is 482915",
+    "mode": "otp"
+  }'`;
+---
+
+<section class="section guide" id="guide" aria-labelledby="guide-title">
+  <div class="wrap">
+    <header class="guide__head reveal">
+      <p class="section__eyebrow">How to use</p>
+      <h2 id="guide-title" class="section__title">From zero to OTP in five steps</h2>
+      <p class="section__lead">
+        Run the stack, pair a phone, attach it to a project, then send from your backend while Live Monitor watches the fleet.
+      </p>
+    </header>
+
+    <ol class="guide__steps">
+      {
+        guideSteps.map((step) => (
+          <li class="guide-step reveal">
+            <div class="guide-step__art">
+              <GuideArt art={step.art} />
+            </div>
+            <div>
+              <p class="guide-step__n">Step {step.n}</p>
+              <h3 class="guide-step__title">{step.title}</h3>
+              <p class="guide-step__desc">{step.description}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="guide__arch reveal">
+      <h3 class="guide__arch-title">Architecture at a glance</h3>
+      <p class="guide__arch-lead">
+        Dashboard ↔ API ↔ Android agent. The agent polls for work about every 3s and heartbeats about every 15s—no persistent device WebSocket required.
+      </p>
+      <pre class="arch" aria-label="Architecture diagram"><code>Dashboard  ←JWT / WS→  Django API (+ Redis/Celery)
+                              │
+              device token · poll ~3s · heartbeat ~15s
+                              │
+                         Android agent</code></pre>
+    </div>
+
+    <div class="terminal reveal" aria-label="Example OTP API request">
+      <div class="terminal__bar" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <em>send OTP · curl</em>
+      </div>
+      <pre class="terminal__code"><code>{curlExample}</code></pre>
+    </div>
+  </div>
+</section>
+
+<style>
+  .guide__head {
+    margin-bottom: clamp(2rem, 4vw, 2.75rem);
+  }
+
+  .guide__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .guide-step {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1rem 1.15rem;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(15, 118, 110, 0.1);
+  }
+
+  .guide-step__n {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal-600);
+  }
+
+  .guide-step__title {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+  }
+
+  .guide-step__desc {
+    margin: 0.4rem 0 0;
+    color: var(--slate-600);
+  }
+
+  .guide__arch {
+    margin-top: 2rem;
+    padding: 1.35rem 1.4rem;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(160deg, rgba(15, 118, 110, 0.08), rgba(240, 253, 250, 0.9));
+    border: 1px solid rgba(15, 118, 110, 0.14);
+  }
+
+  .guide__arch-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+  }
+
+  .guide__arch-lead {
+    margin: 0.5rem 0 1rem;
+    color: var(--slate-600);
+    max-width: 48rem;
+  }
+
+  .arch {
+    margin: 0;
+    padding: 1rem 1.1rem;
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    background: var(--slate-900);
+    color: #99f6e4;
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+
+  .arch code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .terminal {
+    margin-top: 1.25rem;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #0b1220;
+    box-shadow: var(--shadow-frame);
+  }
+
+  .terminal__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.7rem 1rem;
+    background: #111827;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .terminal__bar span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #334155;
+  }
+
+  .terminal__bar span:nth-child(1) {
+    background: #f87171;
+  }
+  .terminal__bar span:nth-child(2) {
+    background: #fbbf24;
+  }
+  .terminal__bar span:nth-child(3) {
+    background: #34d399;
+  }
+
+  .terminal__bar em {
+    margin-left: 0.65rem;
+    font-style: normal;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-family: ui-monospace, monospace;
+  }
+
+  .terminal__code {
+    margin: 0;
+    padding: 1.1rem 1.2rem 1.3rem;
+    overflow-x: auto;
+    color: #e2e8f0;
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .terminal__code code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .c-prompt {
+    color: #5eead4;
+  }
+
+  @media (max-width: 640px) {
+    .guide-step {
+      grid-template-columns: 1fr;
+    }
+
+    .guide-step__art {
+      max-width: 160px;
+    }
+  }
+</style>

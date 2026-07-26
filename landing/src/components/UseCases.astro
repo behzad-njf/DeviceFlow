@@ -1,0 +1,91 @@
+---
+import { useCases } from '../data/content';
+import UseCaseArt from './illustrations/UseCaseArt.astro';
+---
+
+<section class="section use-cases" id="use-cases" aria-labelledby="use-cases-title">
+  <div class="wrap">
+    <header class="use-cases__head reveal">
+      <p class="section__eyebrow">Use cases</p>
+      <h2 id="use-cases-title" class="section__title">Built for real product and ops paths</h2>
+      <p class="section__lead">
+        Whether you need auth OTP, order SMS, or carrier automation, DeviceFlow keeps the message path on hardware you operate.
+      </p>
+    </header>
+
+    <div class="use-cases__grid">
+      {
+        useCases.map((item) => (
+          <article class="use-panel reveal" tabindex="0">
+            <UseCaseArt art={item.art} />
+            <h3 class="use-panel__title">{item.title}</h3>
+            <p class="use-panel__desc">{item.description}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .use-cases__head {
+    margin-bottom: clamp(2rem, 4vw, 2.75rem);
+  }
+
+  .use-cases__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .use-panel {
+    padding: 1rem 1rem 1.25rem;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    transition:
+      transform var(--dur) var(--ease-out),
+      border-color var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .use-panel:hover,
+  .use-panel:focus-visible {
+    transform: translateY(-3px);
+    border-color: rgba(15, 118, 110, 0.3);
+    box-shadow: var(--shadow-soft);
+    outline: none;
+  }
+
+  .use-panel__title {
+    margin: 0.9rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.12rem;
+    letter-spacing: -0.02em;
+  }
+
+  .use-panel__desc {
+    margin: 0.45rem 0 0;
+    color: var(--slate-600);
+    font-size: 0.98rem;
+  }
+
+  @media (max-width: 900px) {
+    .use-cases__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .use-cases__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .use-panel:hover,
+    .use-panel:focus-visible {
+      transform: none;
+    }
+  }
+</style>

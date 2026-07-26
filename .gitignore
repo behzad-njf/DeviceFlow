@@ -32,6 +32,8 @@ htmlcov/
 node_modules/
 dashboard/dist/
 dashboard/dist-ssr/
+landing/dist/
+landing/.astro/
 prompts/
 # Django / backend runtime
 backend/db.sqlite3

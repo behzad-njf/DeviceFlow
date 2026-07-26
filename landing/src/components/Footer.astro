@@ -1,0 +1,114 @@
+---
+import { Image } from 'astro:assets';
+import icon from '../assets/images/Icon.png';
+import {
+  GITHUB_URL,
+  GITHUB_PROFILE_URL,
+  LINKEDIN_URL,
+  LICENSE_URL,
+  NOTICE_URL,
+  COPYRIGHT_YEAR,
+  AUTHOR_NAME,
+} from '../consts';
+---
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <div class="footer__brand">
+      <Image src={icon} alt="DeviceFlow icon" width={40} height={40} class="footer__icon" loading="lazy" />
+      <div>
+        <p class="footer__name">DeviceFlow</p>
+        <p class="footer__tag">Self-hosted Android SMS gateway & device automation</p>
+      </div>
+    </div>
+
+    <nav class="footer__nav" aria-label="Footer">
+      <a href={GITHUB_URL} rel="noopener noreferrer">GitHub repo</a>
+      <a href={GITHUB_PROFILE_URL} rel="noopener noreferrer">GitHub profile</a>
+      <a href={LINKEDIN_URL} rel="noopener noreferrer">LinkedIn</a>
+      <a href={LICENSE_URL} rel="noopener noreferrer">License</a>
+      <a href={NOTICE_URL} rel="noopener noreferrer">NOTICE</a>
+      <a href="#features">Features</a>
+      <a href="#guide">Guide</a>
+      <a href="#use-cases">Use cases</a>
+      <a href="#cta">Get started</a>
+    </nav>
+
+    <p class="footer__copy">
+      © {COPYRIGHT_YEAR} {AUTHOR_NAME} · Based on
+      <a href={GITHUB_URL} rel="noopener noreferrer">DeviceFlow</a>
+      · Apache License 2.0 (attribution required)
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: 2.5rem 3rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .footer__inner {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .footer__brand {
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+  }
+
+  .footer__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .footer__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 750;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .footer__tag {
+    margin: 0.15rem 0 0;
+    color: var(--slate-600);
+    font-size: 0.92rem;
+  }
+
+  .footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.15rem;
+  }
+
+  .footer__nav a {
+    text-decoration: none;
+    color: var(--slate-600);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .footer__nav a:hover {
+    color: var(--teal-700);
+  }
+
+  .footer__copy {
+    margin: 0;
+    color: var(--slate-500);
+    font-size: 0.9rem;
+  }
+
+  .footer__copy a {
+    color: var(--teal-700);
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .footer__copy a:hover {
+    text-decoration: underline;
+  }
+</style>

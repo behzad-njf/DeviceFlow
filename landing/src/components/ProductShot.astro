@@ -1,0 +1,65 @@
+---
+import { Image } from 'astro:assets';
+import dashboard from '../assets/images/Dashboard.png';
+---
+
+<section class="section shot" id="product" aria-labelledby="shot-title">
+  <div class="wrap">
+    <header class="shot__head reveal">
+      <p class="section__eyebrow">Product</p>
+      <h2 id="shot-title" class="section__title">Live Monitor in the dashboard</h2>
+      <p class="section__lead">
+        Real-time device tiles, queue depth, and fleet health—operators see status the moment heartbeats and WebSocket events land.
+      </p>
+    </header>
+
+    <figure class="shot__frame reveal">
+      <Image
+        src={dashboard}
+        alt="DeviceFlow dashboard Live Monitor showing device tiles, online status, battery, and dual-SIM details"
+        widths={[640, 960, 1280, 1600]}
+        sizes="(max-width: 1120px) 100vw, 1120px"
+        class="shot__img"
+        loading="lazy"
+        decoding="async"
+      />
+      <figcaption class="shot__cap">Live Monitor — real-time device health, queues, and fleet status</figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .shot__head {
+    margin-bottom: 1.75rem;
+  }
+
+  .shot__frame {
+    margin: 0;
+    padding: 0.75rem;
+    border-radius: calc(var(--radius-lg) + 4px);
+    background: linear-gradient(160deg, rgba(15, 118, 110, 0.16), rgba(255, 255, 255, 0.9));
+    border: 1px solid rgba(15, 118, 110, 0.16);
+    box-shadow: var(--shadow-frame);
+  }
+
+  .shot__img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .shot__cap {
+    margin: 0.85rem 0 0.25rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--slate-600);
+    font-weight: 600;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .shot__frame {
+      animation: float-soft 7s ease-in-out infinite;
+    }
+  }
+</style>

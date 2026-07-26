@@ -1,0 +1,115 @@
+---
+import { features } from '../data/content';
+import FeatureArt from './illustrations/FeatureArt.astro';
+---
+
+<section class="section features" id="features" aria-labelledby="features-title">
+  <div class="wrap">
+    <header class="features__head reveal">
+      <p class="section__eyebrow">Capabilities</p>
+      <h2 id="features-title" class="section__title">Everything you need to run an SMS fleet</h2>
+      <p class="section__lead">
+        From pairing and OTP to USSD, webhooks, and agent security—each piece of DeviceFlow is built for operators who want API control on real SIMs.
+      </p>
+    </header>
+
+    <div class="features__mosaic">
+      {
+        features.map((feature, i) => (
+          <article
+            class:list={['feature', 'reveal', i === 0 || i === 4 || i === 9 ? 'feature--wide' : null]}
+            style={`--i: ${i}`}
+          >
+            <div class="feature__art">
+              <FeatureArt id={feature.id} />
+            </div>
+            <div class="feature__body">
+              <h3 class="feature__title">{feature.title}</h3>
+              <p class="feature__desc">{feature.description}</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .features__head {
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .features__mosaic {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .feature {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(15, 118, 110, 0.1);
+    transition:
+      transform var(--dur) var(--ease-out),
+      border-color var(--dur) var(--ease-out),
+      box-shadow var(--dur) var(--ease-out);
+  }
+
+  .feature:hover {
+    transform: translateY(-3px);
+    border-color: rgba(15, 118, 110, 0.28);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .feature__art {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .feature__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--slate-900);
+  }
+
+  .feature__desc {
+    margin: 0.4rem 0 0;
+    color: var(--slate-600);
+    font-size: 0.98rem;
+  }
+
+  .feature--wide {
+    grid-column: span 1;
+  }
+
+  @media (min-width: 901px) {
+    .feature--wide {
+      grid-column: span 1;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .features__mosaic {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .features__mosaic {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .feature:hover {
+      transform: none;
+    }
+  }
+</style>

@@ -1,0 +1,304 @@
+---
+import type { FeatureId } from '../data/content';
+
+interface Props {
+  id: FeatureId;
+  class?: string;
+}
+
+const { id, class: className = '' } = Astro.props;
+
+const label: Record<FeatureId, string> = {
+  pairing: 'Phone pairing with heartbeat pulse to cloud',
+  otp: 'Shield with one-time passcode bubble',
+  transactional: 'Receipt message leaving a phone',
+  bulk: 'Megaphone broadcasting to many recipients',
+  fleet: 'Monitor showing live device tiles',
+  dualsim: 'Phone with two SIM cards and route arrows',
+  ussd: 'Dashboard dialing a USSD star-hash code',
+  webhooks: 'API key and webhook nodes connected',
+  contacts: 'Address book and conversation thread',
+  routing: 'Operator rule paths to preferred SIM',
+  security: 'Hidden app icon behind a passcode lock',
+  dialer: 'Dialer pad revealing secret star-hash code',
+  automations: 'Plugin blocks triggering a workflow',
+  analytics: 'Map pin, chart, and queue bars',
+};
+---
+
+<svg
+  class={`feature-art ${className}`}
+  viewBox="0 0 200 140"
+  role="img"
+  aria-label={label[id]}
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <linearGradient id={`g-${id}`} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F766E" />
+      <stop offset="100%" stop-color="#0D5C56" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="140" rx="18" fill="#F0FDFA" />
+  <circle cx="168" cy="28" r="26" fill="#CCFBF1" opacity="0.7" />
+  <circle cx="28" cy="118" r="20" fill="#CCFBF1" opacity="0.55" />
+
+  {
+    id === 'pairing' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="34" y="28" width="42" height="72" rx="7" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <circle cx="55" cy="90" r="3" fill="#0F766E" />
+        <path d="M55 48c0 0 8 6 0 14c-8-8 0-14 0-14z" fill="#0F766E" opacity="0.2" />
+        <path class="pulse-ring" d="M76 48c8-8 8-20 0-28M82 52c12-12 12-30 0-42" stroke="#0F766E" stroke-width="2" />
+        <path d="M92 62h28" stroke="#94A3B8" stroke-width="2" stroke-dasharray="4 4" />
+        <rect x="118" y="42" width="48" height="40" rx="10" fill="url(#g-pairing)" />
+        <circle cx="142" cy="62" r="8" fill="#fff" opacity="0.9" />
+        <path d="M134 78h16M138 70v16" stroke="#fff" stroke-width="2" opacity="0.5" />
+        <circle class="msg-pulse" cx="100" cy="62" r="4" fill="#D9776A" />
+      </g>
+    )
+  }
+
+  {
+    id === 'otp' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M100 24l36 12v28c0 22-16 36-36 44c-20-8-36-22-36-44V36l36-12z" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <path d="M86 62l10 10 20-22" stroke="#0F766E" stroke-width="3" />
+        <rect x="118" y="78" width="54" height="34" rx="10" fill="url(#g-otp)" />
+        <text x="145" y="100" text-anchor="middle" fill="#fff" font-size="13" font-family="ui-monospace,monospace" font-weight="700">
+          482915
+        </text>
+      </g>
+    )
+  }
+
+  {
+    id === 'transactional' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="28" y="30" width="46" height="78" rx="8" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="36" y="42" width="30" height="18" rx="4" fill="#CCFBF1" />
+        <path d="M40 72h22M40 82h16" stroke="#94A3B8" stroke-width="2" />
+        <path d="M86 58h24" stroke="#0F766E" stroke-width="2.5" />
+        <polygon points="110,52 122,58 110,64" fill="#D9776A" />
+        <rect x="128" y="40" width="48" height="56" rx="8" fill="url(#g-transactional)" />
+        <path d="M140 58h24M140 70h18M140 82h22" stroke="#fff" stroke-width="2.5" opacity="0.9" />
+        <circle cx="152" cy="48" r="4" fill="#F0FDFA" />
+      </g>
+    )
+  }
+
+  {
+    id === 'bulk' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M48 78c0-18 12-34 34-40l6 14c-14 4-22 14-22 26z" fill="#0F766E" />
+        <path d="M82 52l40-18v28l-40-10z" fill="url(#g-bulk)" />
+        <rect x="70" y="78" width="14" height="22" rx="3" fill="#0D5C56" />
+        <circle cx="140" cy="46" r="7" fill="#CCFBF1" stroke="#0F766E" stroke-width="2" />
+        <circle cx="160" cy="68" r="7" fill="#CCFBF1" stroke="#0F766E" stroke-width="2" />
+        <circle cx="148" cy="92" r="7" fill="#CCFBF1" stroke="#0F766E" stroke-width="2" />
+        <circle cx="124" cy="100" r="7" fill="#CCFBF1" stroke="#0F766E" stroke-width="2" />
+      </g>
+    )
+  }
+
+  {
+    id === 'fleet' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="30" y="28" width="140" height="84" rx="10" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="30" y="28" width="140" height="16" rx="10" fill="url(#g-fleet)" />
+        <rect x="42" y="56" width="36" height="40" rx="6" fill="#F0FDFA" stroke="#0F766E" stroke-width="1.5" />
+        <rect x="86" y="56" width="36" height="40" rx="6" fill="#F0FDFA" stroke="#0F766E" stroke-width="1.5" />
+        <rect x="130" y="56" width="28" height="40" rx="6" fill="#F0FDFA" stroke="#0F766E" stroke-width="1.5" />
+        <circle cx="52" cy="68" r="4" fill="#059669" />
+        <circle cx="96" cy="68" r="4" fill="#059669" />
+        <circle cx="140" cy="68" r="4" fill="#D9776A" />
+        <path d="M48 84h20M92 84h20M136 84h14" stroke="#94A3B8" stroke-width="2" />
+      </g>
+    )
+  }
+
+  {
+    id === 'dualsim' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="70" y="24" width="50" height="86" rx="8" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="36" y="48" width="28" height="38" rx="5" fill="url(#g-dualsim)" />
+        <text x="50" y="72" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="ui-sans-serif,sans-serif">
+          SIM1
+        </text>
+        <rect x="136" y="48" width="28" height="38" rx="5" fill="#0D5C56" />
+        <text x="150" y="72" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="ui-sans-serif,sans-serif">
+          SIM2
+        </text>
+        <path d="M64 67h6M130 67h-6" stroke="#D9776A" stroke-width="2.5" />
+        <path d="M95 70v20M88 82l7 8 7-8" stroke="#0F766E" stroke-width="2" />
+      </g>
+    )
+  }
+
+  {
+    id === 'ussd' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="24" y="34" width="90" height="70" rx="10" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="34" y="46" width="70" height="18" rx="5" fill="#F0FDFA" stroke="#0F766E" stroke-width="1.5" />
+        <text x="69" y="59" text-anchor="middle" fill="#0D5C56" font-size="11" font-family="ui-monospace,monospace" font-weight="700">
+          *141#
+        </text>
+        <rect x="34" y="72" width="22" height="14" rx="3" fill="#CCFBF1" />
+        <rect x="60" y="72" width="22" height="14" rx="3" fill="#CCFBF1" />
+        <rect x="86" y="72" width="18" height="14" rx="3" fill="url(#g-ussd)" />
+        <rect x="130" y="40" width="42" height="70" rx="8" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <circle cx="151" cy="96" r="3.5" fill="#0F766E" />
+        <path d="M148 58h6M145 68h12M145 78h12" stroke="#94A3B8" stroke-width="2" />
+      </g>
+    )
+  }
+
+  {
+    id === 'webhooks' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="48" cy="70" r="18" fill="url(#g-webhooks)" />
+        <path d="M42 70h12M48 64v12" stroke="#fff" stroke-width="2.5" />
+        <path d="M68 70h28" stroke="#0F766E" stroke-width="2.5" stroke-dasharray="5 4" />
+        <rect x="96" y="40" width="70" height="60" rx="10" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <circle cx="118" cy="62" r="8" fill="#CCFBF1" stroke="#0F766E" stroke-width="2" />
+        <circle cx="146" cy="62" r="8" fill="#CCFBF1" stroke="#0F766E" stroke-width="2" />
+        <circle cx="132" cy="84" r="8" fill="#F0FDFA" stroke="#0F766E" stroke-width="2" />
+        <path d="M126 62h12M118 70l14 14M146 70l-14 14" stroke="#0F766E" stroke-width="2" />
+        <text x="131" y="50" text-anchor="middle" fill="#0D5C56" font-size="9" font-family="ui-monospace,monospace" font-weight="700">
+          API KEY
+        </text>
+      </g>
+    )
+  }
+
+  {
+    id === 'contacts' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="28" y="28" width="58" height="84" rx="10" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <circle cx="57" cy="52" r="12" fill="#CCFBF1" stroke="#0F766E" stroke-width="2" />
+        <path d="M40 88c4-12 30-12 34 0" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="100" y="36" width="72" height="22" rx="8" fill="url(#g-contacts)" />
+        <rect x="100" y="66" width="72" height="22" rx="8" fill="#fff" stroke="#0F766E" stroke-width="2" />
+        <rect x="100" y="96" width="56" height="16" rx="8" fill="#F0FDFA" stroke="#0F766E" stroke-width="1.5" />
+        <path d="M112 47h40M112 77h32" stroke="#fff" stroke-width="2" opacity="0.001" />
+        <path d="M112 77h40" stroke="#94A3B8" stroke-width="2" />
+      </g>
+    )
+  }
+
+  {
+    id === 'routing' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="44" cy="70" r="14" fill="url(#g-routing)" />
+        <path d="M58 70h24" stroke="#0F766E" stroke-width="2.5" />
+        <path d="M82 70c12-28 40-28 52 0M82 70c12 28 40 28 52 0" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="132" y="34" width="40" height="28" rx="7" fill="#fff" stroke="#0F766E" stroke-width="2" />
+        <text x="152" y="52" text-anchor="middle" fill="#0D5C56" font-size="10" font-weight="700" font-family="ui-sans-serif,sans-serif">
+          MCI
+        </text>
+        <rect x="132" y="78" width="40" height="28" rx="7" fill="#fff" stroke="#94A3B8" stroke-width="2" />
+        <text x="152" y="96" text-anchor="middle" fill="#64748B" font-size="9" font-weight="700" font-family="ui-sans-serif,sans-serif">
+          RTL
+        </text>
+        <circle class="msg-pulse" cx="118" cy="52" r="4" fill="#D9776A" />
+      </g>
+    )
+  }
+
+  {
+    id === 'security' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="40" y="46" width="48" height="48" rx="12" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5 4" />
+        <path d="M52 70h24M64 58v24" stroke="#94A3B8" stroke-width="2.5" opacity="0.5" />
+        <text x="64" y="110" text-anchor="middle" fill="#64748B" font-size="9" font-family="ui-sans-serif,sans-serif">
+          hidden
+        </text>
+        <rect x="110" y="36" width="56" height="72" rx="10" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <circle cx="138" cy="62" r="12" fill="#F0FDFA" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="130" y="62" width="16" height="14" rx="3" fill="url(#g-security)" />
+        <path d="M124 88h28" stroke="#94A3B8" stroke-width="2" />
+        <circle cx="130" cy="98" r="2.5" fill="#0F766E" />
+        <circle cx="138" cy="98" r="2.5" fill="#0F766E" />
+        <circle cx="146" cy="98" r="2.5" fill="#0F766E" />
+      </g>
+    )
+  }
+
+  {
+    id === 'dialer' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="55" y="18" width="90" height="108" rx="12" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="67" y="30" width="66" height="20" rx="5" fill="#F0FDFA" stroke="#0F766E" stroke-width="1.5" />
+        <text x="100" y="44" text-anchor="middle" fill="#0D5C56" font-size="9" font-family="ui-monospace,monospace" font-weight="700">
+          *#*#738#*#*
+        </text>
+        {
+          [0, 1, 2].map((row) =>
+            [0, 1, 2].map((col) => (
+              <rect
+                x={67 + col * 24}
+                y={60 + row * 20}
+                width="18"
+                height="14"
+                rx="3"
+                fill={row === 2 && col === 1 ? 'url(#g-dialer)' : '#CCFBF1'}
+              />
+            )),
+          )
+        }
+      </g>
+    )
+  }
+
+  {
+    id === 'automations' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="28" y="40" width="44" height="28" rx="8" fill="url(#g-automations)" />
+        <text x="50" y="58" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="ui-sans-serif,sans-serif">
+          IF
+        </text>
+        <path d="M72 54h18" stroke="#0F766E" stroke-width="2.5" />
+        <polygon points="90,48 100,54 90,60" fill="#D9776A" />
+        <rect x="104" y="40" width="44" height="28" rx="8" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <text x="126" y="58" text-anchor="middle" fill="#0D5C56" font-size="9" font-weight="700" font-family="ui-sans-serif,sans-serif">
+          EVENT
+        </text>
+        <path d="M126 68v12" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="86" y="80" width="80" height="28" rx="8" fill="#F0FDFA" stroke="#0F766E" stroke-width="2.5" />
+        <text x="126" y="98" text-anchor="middle" fill="#0D5C56" font-size="9" font-weight="700" font-family="ui-sans-serif,sans-serif">
+          PLUGIN / HOOK
+        </text>
+      </g>
+    )
+  }
+
+  {
+    id === 'analytics' && (
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="24" y="30" width="70" height="80" rx="10" fill="#fff" stroke="#0F766E" stroke-width="2.5" />
+        <path d="M36 90c10-24 18-10 28-34c6 12 12 8 18-8" stroke="#0F766E" stroke-width="2.5" />
+        <circle cx="82" cy="48" r="3.5" fill="#D9776A" />
+        <rect x="108" y="30" width="68" height="80" rx="10" fill="#F0FDFA" stroke="#0F766E" stroke-width="2.5" />
+        <rect x="120" y="86" width="10" height="14" rx="2" fill="#94A3B8" />
+        <rect x="136" y="70" width="10" height="30" rx="2" fill="#0F766E" />
+        <rect x="152" y="58" width="10" height="42" rx="2" fill="url(#g-analytics)" />
+        <path d="M148 44l8 14h-16z" fill="#D9776A" />
+        <circle cx="148" cy="44" r="5" fill="#0D5C56" />
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .feature-art {
+    width: 100%;
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pulse-ring {
+      animation: float-soft 3.2s ease-in-out infinite;
+      transform-origin: 70px 40px;
+    }
+  }
+</style>

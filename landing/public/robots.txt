@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://smsgateway.behzaaad.ir/sitemap-index.xml

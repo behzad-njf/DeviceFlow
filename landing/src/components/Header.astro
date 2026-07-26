@@ -1,0 +1,95 @@
+---
+import { Image } from 'astro:assets';
+import icon from '../assets/images/Icon.png';
+import { GITHUB_URL } from '../consts';
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="#top" data-astro-prefetch="false">
+      <Image src={icon} alt="" width={36} height={36} densities={[1, 2]} class="brand__icon" loading="eager" />
+      <span class="brand__name">DeviceFlow</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#guide">Guide</a>
+      <a href="#use-cases">Use cases</a>
+      <a class="nav__cta" href={GITHUB_URL} rel="noopener noreferrer">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    backdrop-filter: blur(12px);
+    background: rgba(246, 247, 244, 0.82);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4rem;
+    gap: 1rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    text-decoration: none;
+    color: var(--slate-900);
+  }
+
+  .brand__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+  }
+
+  .brand__name {
+    font-family: var(--font-display);
+    font-weight: 750;
+    font-size: 1.15rem;
+    letter-spacing: -0.03em;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+  }
+
+  .nav a {
+    text-decoration: none;
+    color: var(--slate-600);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .nav a:hover {
+    color: var(--teal-700);
+  }
+
+  .nav__cta {
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: var(--teal-600);
+    color: var(--white) !important;
+  }
+
+  .nav__cta:hover {
+    background: var(--teal-700);
+    color: var(--white) !important;
+  }
+
+  @media (max-width: 640px) {
+    .nav a:not(.nav__cta) {
+      display: none;
+    }
+  }
+</style>

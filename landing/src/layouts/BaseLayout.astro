@@ -1,0 +1,143 @@
+---
+import '@fontsource-variable/syne';
+import '@fontsource-variable/figtree';
+import '../styles/global.css';
+import {
+  SITE_URL,
+  SITE_TITLE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  GITHUB_URL,
+  AUTHOR_NAME,
+} from '../consts';
+import iconUrl from '../assets/images/Icon.png';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+}
+
+const {
+  title = SITE_TITLE,
+  description = SITE_DESCRIPTION,
+  canonicalPath = '/',
+} = Astro.props;
+
+const canonical = new URL(canonicalPath, SITE_URL).href;
+const ogImage = new URL('/og-banner.jpg', SITE_URL).href;
+const iconHref = new URL(iconUrl.src, SITE_URL).href;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_NAME,
+    url: SITE_URL,
+    description,
+    inLanguage: 'en',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: iconHref,
+    sameAs: [GITHUB_URL, 'https://www.linkedin.com/in/behzadnjf/'],
+    founder: {
+      '@type': 'Person',
+      name: AUTHOR_NAME,
+      url: 'https://www.linkedin.com/in/behzadnjf/',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: SITE_NAME,
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Android, Linux, macOS, Windows',
+    url: SITE_URL,
+    downloadUrl: GITHUB_URL,
+    image: ogImage,
+    description,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    license: 'https://www.apache.org/licenses/LICENSE-2.0',
+    author: {
+      '@type': 'Person',
+      name: AUTHOR_NAME,
+    },
+  },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={AUTHOR_NAME} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#0F766E" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content="DeviceFlow — Android phones to API-driven SMS gateway" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="alternate" hreflang="en" href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+
+    <script>
+      // Scroll reveal fallback for browsers without animation-timeline
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const nodes = document.querySelectorAll('.reveal');
+      if (reduce) {
+        nodes.forEach((el) => el.classList.add('is-in'));
+      } else if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries, obs) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-in');
+                obs.unobserve(entry.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+        );
+        nodes.forEach((el, i) => {
+          el.style.setProperty('--reveal-delay', `${Math.min(i % 4, 3) * 70}ms`);
+          io.observe(el);
+        });
+      } else {
+        nodes.forEach((el) => el.classList.add('is-in'));
+      }
+    </script>
+  </body>
+</html>
