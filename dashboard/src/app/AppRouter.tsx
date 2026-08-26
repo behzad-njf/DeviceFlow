@@ -25,9 +25,11 @@ import { PluginsPage } from '../pages/Plugins/PluginsPage'
 import { NotificationsPage } from '../pages/Notifications/NotificationsPage'
 import { AutomationsPage } from '../pages/Automations/AutomationsPage'
 
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
+
 export function AppRouter() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename === '/' ? undefined : routerBasename}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route element={<ProtectedRoute />}>
