@@ -1424,6 +1424,42 @@
   margin: 0;
 }
 
+.project-sim-pref {
+  font-size: 12px;
+}
+
+.project-edit-device-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.project-edit-device-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
+  padding: 10px 12px;
+}
+
+.project-edit-device-card.is-selected {
+  border-color: color-mix(in srgb, var(--brand-500) 35%, var(--border));
+  background: color-mix(in srgb, var(--brand-500) 6%, var(--bg-muted));
+}
+
+.project-sim-settings {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+
+.project-fallback-row {
+  font-size: 13px;
+}
+
 .status-dot {
   width: 8px;
   height: 8px;

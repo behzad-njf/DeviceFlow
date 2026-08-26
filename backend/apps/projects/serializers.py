@@ -3,6 +3,14 @@ from rest_framework import serializers
 from apps.projects.models import Project, ProjectDevice
 
 
+class ProjectDeviceSettingsSerializer(serializers.Serializer):
+    preferred_sim_slot = serializers.IntegerField(
+        required=False, allow_null=True, min_value=1, max_value=2
+    )
+    sim_fallback_enabled = serializers.BooleanField(required=False)
+    priority = serializers.IntegerField(required=False, min_value=0, max_value=10000)
+
+
 class ProjectDeviceBriefSerializer(serializers.Serializer):
     device_id = serializers.UUIDField()
     name = serializers.CharField()
@@ -12,6 +20,8 @@ class ProjectDeviceBriefSerializer(serializers.Serializer):
     last_seen_at = serializers.DateTimeField(allow_null=True)
     priority = serializers.IntegerField()
     exclusive = serializers.BooleanField()
+    preferred_sim_slot = serializers.IntegerField(allow_null=True)
+    sim_fallback_enabled = serializers.BooleanField()
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -73,6 +83,8 @@ class ProjectSerializer(serializers.ModelSerializer):
                     "last_seen_at": device.last_seen_at,
                     "priority": link.priority,
                     "exclusive": link.exclusive,
+                    "preferred_sim_slot": link.preferred_sim_slot,
+                    "sim_fallback_enabled": link.sim_fallback_enabled,
                 }
             )
         # Stable order: priority then name
@@ -96,4 +108,7 @@ class ProjectDeviceSerializer(serializers.Serializer):
     )
     priorities = serializers.DictField(
         child=serializers.IntegerField(), required=False
+    )
+    device_settings = serializers.DictField(
+        child=ProjectDeviceSettingsSerializer(), required=False
     )

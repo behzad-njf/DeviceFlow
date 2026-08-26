@@ -41,6 +41,15 @@ class ProjectDevice(models.Model):
     )
     priority = models.IntegerField(default=100)
     exclusive = models.BooleanField(default=False)
+    preferred_sim_slot = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Preferred SIM slot (1 or 2) for this project on this device.",
+    )
+    sim_fallback_enabled = models.BooleanField(
+        default=True,
+        help_text="Allow another SIM if the preferred slot is unavailable.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

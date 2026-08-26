@@ -9,6 +9,14 @@ export type ProjectDevice = {
   last_seen_at: string | null
   priority: number
   exclusive: boolean
+  preferred_sim_slot: number | null
+  sim_fallback_enabled: boolean
+}
+
+export type ProjectDeviceSettings = {
+  preferred_sim_slot?: number | null
+  sim_fallback_enabled?: boolean
+  priority?: number
 }
 
 export type Project = {
@@ -44,10 +52,18 @@ export function getProjectDevices(token: string, projectId: string) {
   })
 }
 
-export function setProjectDevices(token: string, projectId: string, deviceIds: string[]) {
+export function setProjectDevices(
+  token: string,
+  projectId: string,
+  deviceIds: string[],
+  deviceSettings?: Record<string, ProjectDeviceSettings>,
+) {
   return apiRequest<{ results: ProjectDevice[] }>(`/projects/${projectId}/devices/`, {
     method: 'PUT',
     token,
-    body: { device_ids: deviceIds },
+    body: {
+      device_ids: deviceIds,
+      device_settings: deviceSettings,
+    },
   })
 }

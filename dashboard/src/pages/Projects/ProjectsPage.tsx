@@ -9,15 +9,35 @@ import {
   listProjects,
   setProjectDevices,
   type Project,
+  type ProjectDeviceSettings,
 } from '../../shared/api/projects'
 import { Button, Field, TextInput } from '../../shared/ui/Form'
 import { useAuthStore } from '../../features/auth/authStore'
 import { displayDeviceStatus } from '../../shared/lib/deviceStatus'
 
+type DraftSettings = Record<string, ProjectDeviceSettings>
+
+const defaultDeviceSettings = (): ProjectDeviceSettings => ({
+  preferred_sim_slot: null,
+  sim_fallback_enabled: true,
+})
+
 function deviceLabel(device: Pick<Device, 'name' | 'status' | 'last_seen_at' | 'agent_version'>) {
   const status = displayDeviceStatus(device)
   const ver = device.agent_version ? ` · v${device.agent_version}` : ''
   return `${device.name} (${status}${ver})`
+}
+
+function simOptionLabel(
+  device: Device,
+  slotIndex: number,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+) {
+  const sim = device.sims.find((s) => s.slot_index === slotIndex)
+  if (!sim) return t('projects.simSlot', { slot: slotIndex })
+  const operator = sim.operator ? ` · ${sim.operator}` : ''
+  const number = sim.phone_number ? ` · ${sim.phone_number}` : ''
+  return t('projects.simSlot', { slot: slotIndex }) + operator + number
 }
 
 export function ProjectsPage() {
@@ -30,6 +50,7 @@ export function ProjectsPage() {
   const [mode, setMode] = useState('transactional')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draftDeviceIds, setDraftDeviceIds] = useState<string[]>([])
+  const [draftDeviceSettings, setDraftDeviceSettings] = useState<DraftSettings>({})
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
@@ -38,6 +59,12 @@ export function ProjectsPage() {
     () => devices.filter((d) => d.is_paired),
     [devices],
   )
+
+  const devicesById = useMemo(() => {
+    const map = new Map<string, Device>()
+    for (const d of pairedDevices) map.set(d.id, d)
+    return map
+  }, [pairedDevices])
 
   const attachedDeviceIds = useMemo(() => {
     const ids = new Set<string>()
@@ -86,8 +113,17 @@ export function ProjectsPage() {
   }
 
   function startEdit(project: Project) {
+    const settings: DraftSettings = {}
+    for (const d of project.devices || []) {
+      settings[d.device_id] = {
+        preferred_sim_slot: d.preferred_sim_slot ?? null,
+        sim_fallback_enabled: d.sim_fallback_enabled ?? true,
+        priority: d.priority,
+      }
+    }
     setEditingId(project.id)
     setDraftDeviceIds((project.devices || []).map((d) => d.device_id))
+    setDraftDeviceSettings(settings)
     setNotice(null)
     setError(null)
   }
@@ -95,6 +131,7 @@ export function ProjectsPage() {
   function cancelEdit() {
     setEditingId(null)
     setDraftDeviceIds([])
+    setDraftDeviceSettings({})
   }
 
   async function saveDevices(projectId: string) {
@@ -103,10 +140,15 @@ export function ProjectsPage() {
     setError(null)
     setNotice(null)
     try {
-      await setProjectDevices(token, projectId, draftDeviceIds)
+      const deviceSettings: DraftSettings = {}
+      for (const id of draftDeviceIds) {
+        deviceSettings[id] = draftDeviceSettings[id] ?? defaultDeviceSettings()
+      }
+      await setProjectDevices(token, projectId, draftDeviceIds, deviceSettings)
       setNotice(t('projects.devicesSaved'))
       setEditingId(null)
       setDraftDeviceIds([])
+      setDraftDeviceSettings({})
       await refresh()
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t('common.error'))
@@ -119,6 +161,29 @@ export function ProjectsPage() {
     setDraftDeviceIds((prev) =>
       checked ? [...prev, deviceId] : prev.filter((id) => id !== deviceId),
     )
+    if (checked) {
+      setDraftDeviceSettings((prev) => ({
+        ...prev,
+        [deviceId]: prev[deviceId] ?? defaultDeviceSettings(),
+      }))
+    }
+  }
+
+  function updateDraftSetting(
+    deviceId: string,
+    patch: Partial<ProjectDeviceSettings>,
+  ) {
+    setDraftDeviceSettings((prev) => ({
+      ...prev,
+      [deviceId]: { ...(prev[deviceId] ?? defaultDeviceSettings()), ...patch },
+    }))
+  }
+
+  function formatPreferredSim(deviceId: string, slot: number | null) {
+    if (slot == null) return t('projects.simAuto')
+    const device = devicesById.get(deviceId)
+    if (!device) return t('projects.simSlot', { slot })
+    return simOptionLabel(device, slot, t)
   }
 
   return (
@@ -283,6 +348,13 @@ export function ProjectsPage() {
                                 {d.agent_version ? ` · v${d.agent_version}` : ''}
                                 {` · ${t('projects.health')} ${d.health_score}`}
                               </span>
+                              <span className="project-sim-pref muted-text">
+                                {t('projects.preferredSim')}:{' '}
+                                {formatPreferredSim(d.device_id, d.preferred_sim_slot ?? null)}
+                                {!d.sim_fallback_enabled
+                                  ? ` · ${t('projects.simFallbackOff')}`
+                                  : ''}
+                              </span>
                             </div>
                             <span className="project-priority muted-text">
                               {t('projects.priority')}: {d.priority}
@@ -295,28 +367,81 @@ export function ProjectsPage() {
                 ) : (
                   <div className="project-edit-devices">
                     <p className="muted-text">{t('projects.manageHint')}</p>
+                    <p className="muted-text">{t('projects.simHint')}</p>
                     {!pairedDevices.length ? (
                       <p>{t('projects.noPairedDevices')}</p>
                     ) : (
-                      <div className="checkbox-list project-checkbox-list">
+                      <div className="project-edit-device-grid">
                         {pairedDevices.map((d) => {
                           const checked = draftDeviceIds.includes(d.id)
+                          const settings = draftDeviceSettings[d.id] ?? defaultDeviceSettings()
+                          const activeSlots = d.sims.filter((s) => s.is_active)
                           return (
-                            <label key={d.id} className="checkbox-row project-check-row">
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={(e) => toggleDraft(d.id, e.target.checked)}
-                              />
-                              <span className={`status-dot status-${displayDeviceStatus(d)}`} />
-                              <span>{deviceLabel(d)}</span>
-                              {attachedDeviceIds.has(d.id) &&
-                              !(project.devices || []).some((x) => x.device_id === d.id) ? (
-                                <span className="project-elsewhere muted-text">
-                                  {t('projects.alsoElsewhere')}
-                                </span>
+                            <div
+                              key={d.id}
+                              className={`project-edit-device-card ${checked ? 'is-selected' : ''}`}
+                            >
+                              <label className="checkbox-row project-check-row">
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={(e) => toggleDraft(d.id, e.target.checked)}
+                                />
+                                <span className={`status-dot status-${displayDeviceStatus(d)}`} />
+                                <span>{deviceLabel(d)}</span>
+                                {attachedDeviceIds.has(d.id) &&
+                                !(project.devices || []).some((x) => x.device_id === d.id) ? (
+                                  <span className="project-elsewhere muted-text">
+                                    {t('projects.alsoElsewhere')}
+                                  </span>
+                                ) : null}
+                              </label>
+
+                              {checked ? (
+                                <div className="project-sim-settings">
+                                  <Field
+                                    label={t('projects.preferredSim')}
+                                    htmlFor={`sim-${project.id}-${d.id}`}
+                                  >
+                                    <select
+                                      id={`sim-${project.id}-${d.id}`}
+                                      className="df-input"
+                                      value={
+                                        settings.preferred_sim_slot == null
+                                          ? ''
+                                          : String(settings.preferred_sim_slot)
+                                      }
+                                      onChange={(e) =>
+                                        updateDraftSetting(d.id, {
+                                          preferred_sim_slot: e.target.value
+                                            ? Number(e.target.value)
+                                            : null,
+                                        })
+                                      }
+                                    >
+                                      <option value="">{t('projects.simAuto')}</option>
+                                      {activeSlots.map((sim) => (
+                                        <option key={sim.id} value={sim.slot_index}>
+                                          {simOptionLabel(d, sim.slot_index, t)}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </Field>
+                                  <label className="checkbox-row project-fallback-row">
+                                    <input
+                                      type="checkbox"
+                                      checked={settings.sim_fallback_enabled ?? true}
+                                      onChange={(e) =>
+                                        updateDraftSetting(d.id, {
+                                          sim_fallback_enabled: e.target.checked,
+                                        })
+                                      }
+                                    />
+                                    <span>{t('projects.simFallback')}</span>
+                                  </label>
+                                </div>
                               ) : null}
-                            </label>
+                            </div>
                           )
                         })}
                       </div>

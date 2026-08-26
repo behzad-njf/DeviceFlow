@@ -9,6 +9,18 @@ from apps.projects.models import Project, ProjectDevice
 from .serializers import ProjectCreateSerializer, ProjectDeviceSerializer, ProjectSerializer
 
 
+def _serialize_project_device_link(link: ProjectDevice) -> dict:
+    return {
+        "device_id": str(link.device_id),
+        "name": link.device.name,
+        "status": link.device.status,
+        "priority": link.priority,
+        "exclusive": link.exclusive,
+        "preferred_sim_slot": link.preferred_sim_slot,
+        "sim_fallback_enabled": link.sim_fallback_enabled,
+    }
+
+
 class ProjectListCreateView(APIView):
     permission_classes = [RequirePermission]
 
@@ -103,20 +115,7 @@ class ProjectDevicesView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
         links = ProjectDevice.objects.filter(project=project).select_related("device")
-        return Response(
-            {
-                "results": [
-                    {
-                        "device_id": str(link.device_id),
-                        "name": link.device.name,
-                        "status": link.device.status,
-                        "priority": link.priority,
-                        "exclusive": link.exclusive,
-                    }
-                    for link in links
-                ]
-            }
-        )
+        return Response({"results": [_serialize_project_device_link(link) for link in links]})
 
     def put(self, request, project_id):
         project = Project.objects.filter(tenant=request.tenant, id=project_id).first()
@@ -129,8 +128,9 @@ class ProjectDevicesView(APIView):
         serializer.is_valid(raise_exception=True)
         device_ids = serializer.validated_data["device_ids"]
         priorities = serializer.validated_data.get("priorities") or {}
-        devices = Device.objects.filter(tenant=request.tenant, id__in=device_ids)
-        if devices.count() != len(set(device_ids)):
+        device_settings = serializer.validated_data.get("device_settings") or {}
+        devices = list(Device.objects.filter(tenant=request.tenant, id__in=device_ids))
+        if len(devices) != len(set(device_ids)):
             return Response(
                 {
                     "error": {
@@ -141,11 +141,53 @@ class ProjectDevicesView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        devices_by_id = {str(device.id): device for device in devices}
+        for device_id in device_ids:
+            device_key = str(device_id)
+            device = devices_by_id[device_key]
+            settings = device_settings.get(device_key) or {}
+            preferred_sim_slot = settings.get("preferred_sim_slot")
+            if preferred_sim_slot is not None:
+                if preferred_sim_slot not in (1, 2):
+                    return Response(
+                        {
+                            "error": {
+                                "code": "BAD_REQUEST",
+                                "message": "preferred_sim_slot must be 1 or 2",
+                                "details": {"device_id": device_key},
+                            }
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                if not device.sims.filter(
+                    slot_index=preferred_sim_slot, is_active=True
+                ).exists():
+                    return Response(
+                        {
+                            "error": {
+                                "code": "BAD_REQUEST",
+                                "message": "Preferred SIM slot is not active on this device",
+                                "details": {
+                                    "device_id": device_key,
+                                    "preferred_sim_slot": preferred_sim_slot,
+                                },
+                            }
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
         ProjectDevice.objects.filter(project=project).delete()
         for device in devices:
+            device_key = str(device.id)
+            settings = device_settings.get(device_key) or {}
             ProjectDevice.objects.create(
                 project=project,
                 device=device,
-                priority=int(priorities.get(str(device.id), 100)),
+                priority=int(
+                    settings.get("priority", priorities.get(device_key, 100))
+                ),
+                preferred_sim_slot=settings.get("preferred_sim_slot"),
+                sim_fallback_enabled=settings.get("sim_fallback_enabled", True),
             )
         return self.get(request, project_id)

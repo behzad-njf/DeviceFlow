@@ -342,7 +342,13 @@
     "noPairedDevices": "No paired phones available. Pair a device first.",
     "unattachedTitle": "Phones not in any project",
     "unattachedHint": "These paired phones are online in the fleet but not attached to a project yet.",
-    "alsoElsewhere": "in another project"
+    "alsoElsewhere": "in another project",
+    "preferredSim": "Preferred SIM",
+    "simAuto": "Auto (router picks)",
+    "simSlot": "SIM {{slot}}",
+    "simFallback": "Use another SIM if preferred is unavailable",
+    "simFallbackOff": "strict SIM only",
+    "simHint": "For dual-SIM phones shared across projects, pick a default SIM per project. Disable fallback to fail sends when that SIM is unavailable."
   },
   "routing": {
     "title": "Routing & reliability",

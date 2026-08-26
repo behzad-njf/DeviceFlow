@@ -77,25 +77,51 @@ def _base_candidates(*, tenant, project: Project | None, prefer_online: bool = T
     return [d for d in devices if d.is_paired]
 
 
+def _project_device_prefs(
+    project: Project | None, device: Device
+) -> tuple[int | None, bool]:
+    if project is None:
+        return None, True
+    link = ProjectDevice.objects.filter(project=project, device=device).first()
+    if link is None:
+        return None, True
+    return link.preferred_sim_slot, link.sim_fallback_enabled
+
+
 def _select_sim(
     device: Device,
     *,
     preferred_operator: str | None,
     sim_slot_index: int | None,
+    preferred_sim_slot: int | None = None,
+    sim_fallback_enabled: bool = True,
     tenant_default_quota: int = 1000,
 ) -> SimSlot | None:
-    """Pick an active SIM with remaining daily quota; rotate to least-used."""
+    """Pick an active SIM with remaining daily quota; honor project slot preference."""
     sims = list(device.sims.filter(is_active=True))
     if not sims:
         return None
+
+    def _slot_available(sim: SimSlot) -> bool:
+        return not sim.is_quota_exhausted(tenant_default_quota)
+
+    # Explicit API / routing-rule slot pin takes precedence.
     if sim_slot_index is not None:
         for sim in sims:
             if sim.slot_index == sim_slot_index:
-                if not sim.is_quota_exhausted(tenant_default_quota):
+                if _slot_available(sim):
                     return sim
                 break
 
-    available = [s for s in sims if not s.is_quota_exhausted(tenant_default_quota)]
+    # Per-project preferred SIM when no explicit pin.
+    if sim_slot_index is None and preferred_sim_slot is not None:
+        preferred = next((s for s in sims if s.slot_index == preferred_sim_slot), None)
+        if preferred and _slot_available(preferred):
+            return preferred
+        if not sim_fallback_enabled:
+            return None
+
+    available = [s for s in sims if _slot_available(s)]
     if not available:
         return None
 
@@ -106,6 +132,25 @@ def _select_sim(
         if matched:
             return sorted(matched, key=lambda s: (s.daily_sent, s.slot_index))[0]
     return sorted(available, key=lambda s: (s.daily_sent, s.slot_index))[0]
+
+
+def _select_sim_for_device(
+    device: Device,
+    *,
+    project: Project | None,
+    preferred_operator: str | None,
+    sim_slot_index: int | None,
+    tenant_default_quota: int,
+) -> SimSlot | None:
+    preferred_sim_slot, sim_fallback_enabled = _project_device_prefs(project, device)
+    return _select_sim(
+        device,
+        preferred_operator=preferred_operator,
+        sim_slot_index=sim_slot_index,
+        preferred_sim_slot=preferred_sim_slot,
+        sim_fallback_enabled=sim_fallback_enabled,
+        tenant_default_quota=tenant_default_quota,
+    )
 
 
 def _limits_for_device(config: TenantRoutingConfig, device_id: str) -> dict:
@@ -149,8 +194,9 @@ def route_message(
         device = qs.filter(name=device_ref).first() or qs.filter(id=device_ref).first()
         if device is None or not device.is_paired:
             return RouteResult(None, None, strategy, operator, "DEVICE_NOT_FOUND")
-        sim = _select_sim(
+        sim = _select_sim_for_device(
             device,
+            project=project,
             preferred_operator=preferred_operator,
             sim_slot_index=sim_slot_index,
             tenant_default_quota=sim_quota_default,
@@ -195,8 +241,9 @@ def route_message(
 
     with_sim = []
     for d in candidates:
-        if _select_sim(
+        if _select_sim_for_device(
             d,
+            project=project,
             preferred_operator=preferred_operator,
             sim_slot_index=None,
             tenant_default_quota=sim_quota_default,
@@ -212,12 +259,19 @@ def route_message(
             forced = next((d for d in all_devs if str(d.id) == forced_device_id), None)
         if forced is None:
             return RouteResult(None, None, strategy, operator, "FORCED_DEVICE_UNAVAILABLE")
-        sim = _select_sim(
+        sim = _select_sim_for_device(
             forced,
+            project=project,
             preferred_operator=preferred_operator,
             sim_slot_index=sim_slot_index,
             tenant_default_quota=sim_quota_default,
         )
+        if sim is None and project is not None:
+            pref, fallback = _project_device_prefs(project, forced)
+            if pref is not None and not fallback:
+                return RouteResult(
+                    None, None, strategy, operator, "PREFERRED_SIM_UNAVAILABLE"
+                )
         return RouteResult(forced, sim, strategy, operator, forced=True)
 
     if prefer_ids:
@@ -240,8 +294,9 @@ def route_message(
             mode_weight=mode_policy.queue_weight_for_mode(mode, config),
         )
         sim = (
-            _select_sim(
+            _select_sim_for_device(
                 device,
+                project=project,
                 preferred_operator=preferred_operator,
                 sim_slot_index=sim_slot_index,
                 tenant_default_quota=sim_quota_default,
@@ -249,6 +304,12 @@ def route_message(
             if device
             else None
         )
+        if sim is None and device is not None and project is not None:
+            pref, fallback = _project_device_prefs(project, device)
+            if pref is not None and not fallback:
+                return RouteResult(
+                    None, None, strategy, operator, "PREFERRED_SIM_UNAVAILABLE"
+                )
         return RouteResult(device, sim, strategy, operator, "ASSIGNED_OFFLINE_FALLBACK")
 
     strategy = mode_policy.prefer_strategy_for_mode(mode, strategy)
@@ -264,17 +325,24 @@ def route_message(
     if device is None:
         return RouteResult(None, None, strategy, operator, "NO_DEVICE_AVAILABLE")
 
-    sim = _select_sim(
+    sim = _select_sim_for_device(
         device,
+        project=project,
         preferred_operator=preferred_operator,
         sim_slot_index=sim_slot_index,
         tenant_default_quota=sim_quota_default,
     )
     if sim is None:
+        pref, fallback = _project_device_prefs(project, device)
+        if pref is not None and not fallback:
+            return RouteResult(
+                None, None, strategy, operator, "PREFERRED_SIM_UNAVAILABLE"
+            )
         remaining = [d for d in candidates if d.id != device.id]
         for alt in remaining:
-            sim = _select_sim(
+            sim = _select_sim_for_device(
                 alt,
+                project=project,
                 preferred_operator=preferred_operator,
                 sim_slot_index=None,
                 tenant_default_quota=sim_quota_default,
