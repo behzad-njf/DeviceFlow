@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from apps.common.permissions import RequirePermission
 from apps.devices.authentication import DeviceTokenAuthentication
-from apps.messaging.models import Message, MessageTemplate
+from apps.messaging.models import IdempotencyRecord, Message, MessageTemplate
 from apps.messaging.services.messages import MessageService
 from apps.messaging.services.templates import (
     IdempotencyConflict,
@@ -60,16 +60,32 @@ class MessageSendView(APIView):
                     tenant=request.tenant, key=idem_key, request_hash=fingerprint
                 )
             except IdempotencyConflict:
-                return Response(
-                    {
-                        "error": {
-                            "code": "IDEMPOTENCY_CONFLICT",
-                            "message": "Idempotency key reused with different payload",
-                            "details": None,
-                        }
-                    },
-                    status=status.HTTP_409_CONFLICT,
+                # OTP resends reuse the same key with a new code body.
+                mode = (data.get("mode") or "").lower()
+                project_obj = getattr(request, "project", None)
+                is_otp = mode == Message.Mode.OTP or (
+                    not mode
+                    and project_obj is not None
+                    and project_obj.mode_default == Message.Mode.OTP
                 )
+                if is_otp:
+                    from apps.messaging.models import IdempotencyRecord
+
+                    IdempotencyRecord.objects.filter(
+                        tenant=request.tenant, key=idem_key
+                    ).delete()
+                    cached = None
+                else:
+                    return Response(
+                        {
+                            "error": {
+                                "code": "IDEMPOTENCY_CONFLICT",
+                                "message": "Idempotency key reused with different payload",
+                                "details": None,
+                            }
+                        },
+                        status=status.HTTP_409_CONFLICT,
+                    )
             if cached is not None:
                 return Response(cached.response_body, status=cached.response_status)
 

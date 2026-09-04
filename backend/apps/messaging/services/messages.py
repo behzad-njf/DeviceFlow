@@ -161,15 +161,42 @@ class MessageService:
             raise RateLimitExceeded(code=limit_code or "RATE_LIMITED")
 
         if client_ref and project is not None:
-            existing = Message.objects.filter(
-                project=project, client_ref=client_ref
-            ).first()
+            existing = (
+                Message.objects.filter(project=project, client_ref=client_ref)
+                .select_for_update()
+                .first()
+            )
             if existing:
-                if existing.to_number != to_number or existing.body != body:
+                if existing.to_number == to_number and existing.body == body:
+                    return existing
+
+                # OTP resends intentionally change the code while often reusing
+                # the same client_ref / Idempotency-Key for a phone. Supersede
+                # the prior message instead of hard-failing with 409.
+                if resolved_mode == Message.Mode.OTP and existing.to_number == to_number:
+                    old_meta = dict(existing.meta or {})
+                    old_meta["superseded"] = True
+                    old_meta["superseded_for_client_ref"] = client_ref
+                    existing.meta = old_meta
+                    existing.client_ref = ""
+                    update_fields = ["client_ref", "meta", "updated_at"]
+                    if existing.status in {
+                        Message.Status.QUEUED,
+                        Message.Status.SCHEDULED,
+                        Message.Status.ASSIGNED,
+                        Message.Status.RETRYING,
+                    }:
+                        existing.status = Message.Status.CANCELLED
+                        existing.error_code = "SUPERSEDED"
+                        existing.error_message = "Replaced by a newer OTP send"
+                        update_fields.extend(
+                            ["status", "error_code", "error_message"]
+                        )
+                    existing.save(update_fields=update_fields)
+                else:
                     raise IdempotencyConflict(
                         "Idempotent client_ref reused with a different payload"
                     )
-                return existing
 
         message_meta = {
             **(meta or {}),
