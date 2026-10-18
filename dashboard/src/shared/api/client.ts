@@ -136,11 +136,23 @@ export async function apiRequest<T>(
     }
 
     const err = data?.error
+    const details = err?.details
+    let message = err?.message || response.statusText || 'Request failed'
+    if (details && typeof details === 'object') {
+      const parts = Object.entries(details as Record<string, unknown>).flatMap(
+        ([field, value]) => {
+          if (Array.isArray(value)) return value.map((v) => `${field}: ${String(v)}`)
+          if (value != null) return [`${field}: ${String(value)}`]
+          return []
+        },
+      )
+      if (parts.length) message = `${message} — ${parts.join('; ')}`
+    }
     throw new ApiError(
       response.status,
       err?.code || 'ERROR',
-      err?.message || response.statusText || 'Request failed',
-      err?.details,
+      message,
+      details,
     )
   }
 

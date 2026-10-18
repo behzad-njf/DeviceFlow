@@ -51,7 +51,7 @@ export function ProjectsPage() {
   const [devices, setDevices] = useState<Device[]>([])
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
-  const [mode, setMode] = useState('transactional')
+  const [mode, setMode] = useState('general')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draftDeviceIds, setDraftDeviceIds] = useState<string[]>([])
   const [draftDeviceSettings, setDraftDeviceSettings] = useState<DraftSettings>({})
@@ -123,7 +123,7 @@ export function ProjectsPage() {
       await createProject(token, { name, slug, mode_default: mode })
       setName('')
       setSlug('')
-      setMode('transactional')
+      setMode('general')
       setNotice(t('projects.created'))
       await refresh()
     } catch (err) {
@@ -310,7 +310,7 @@ export function ProjectsPage() {
                 value={mode}
                 onChange={(e) => setMode(e.target.value)}
               >
-                <option value="transactional">{t('projects.modeTransactional')}</option>
+                <option value="general">{t('projects.modeGeneral')}</option>
                 <option value="otp">{t('projects.modeOtp')}</option>
                 <option value="marketing">{t('projects.modeMarketing')}</option>
               </select>

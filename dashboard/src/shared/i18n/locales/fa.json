@@ -315,7 +315,7 @@
     "name": "نام",
     "slug": "اسلاگ",
     "mode": "حالت پیش‌فرض",
-    "modeTransactional": "تراکنشی",
+    "modeGeneral": "عمومی / تراکنشی",
     "modeOtp": "OTP",
     "modeMarketing": "بازاریابی",
     "active": "فعال",

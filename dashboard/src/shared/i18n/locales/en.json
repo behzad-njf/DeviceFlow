@@ -315,7 +315,7 @@
     "name": "Name",
     "slug": "Slug",
     "mode": "Default mode",
-    "modeTransactional": "Transactional",
+    "modeGeneral": "General / transactional",
     "modeOtp": "OTP",
     "modeMarketing": "Marketing",
     "active": "Active",
