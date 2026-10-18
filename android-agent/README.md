@@ -20,18 +20,61 @@ Kotlin + Jetpack Compose app that turns a phone into a DeviceFlow SMS / automati
 - Physical device recommended (SMS + dialer secret codes)
 - API reachable from the phone (LAN IP or public HTTPS host)
 
-## Build
+## Build (debug)
 
 ```bash
 cd android-agent
 ./gradlew assembleDebug
 ```
 
-Debug APK:
+Output APK:
 
 `app/build/outputs/apk/debug/app-debug.apk`
 
 Or open this folder in Android Studio → **Sync Project with Gradle Files** → Run.
+
+## Signed release build
+
+1. Create a keystore (once — keep it safe; losing it blocks Play updates):
+
+```bash
+cd android-agent
+mkdir -p keystore
+keytool -genkeypair -v \
+  -keystore keystore/deviceflow-release.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias deviceflow
+```
+
+2. Add credentials (gitignored):
+
+```bash
+cp keystore.properties.example keystore.properties
+# edit storePassword / keyAlias / keyPassword
+```
+
+`keystore.properties` example:
+
+```properties
+storeFile=keystore/deviceflow-release.jks
+storePassword=YOUR_STORE_PASSWORD
+keyAlias=deviceflow
+keyPassword=YOUR_KEY_PASSWORD
+```
+
+3. Build signed APK or App Bundle:
+
+```bash
+./gradlew assembleRelease          # APK
+./gradlew bundleRelease            # AAB (Play Store)
+```
+
+Outputs:
+
+- `app/build/outputs/apk/release/app-release.apk`
+- `app/build/outputs/bundle/release/app-release.aab`
+
+Never commit `keystore.properties`, `*.jks`, or `*.keystore`.
 
 ## Pair and stay online
 
@@ -39,15 +82,15 @@ Or open this folder in Android Studio → **Sync Project with Gradle Files** →
 2. On the phone, enter `https://your-host/api/v1` (or `http://LAN_IP:8000/api/v1` for local) and the code.
 3. Grant SMS, Phone, Notifications, and related permissions; disable battery optimization when prompted.
 4. On Xiaomi/Huawei/Oppo, enable **Autostart** and lock the app in Recents. The agent starts after reboot and a 15‑minute watchdog restarts the foreground service if the OS kills it.
+5. Start the agent service. Home should show **Online** / **Synced** when heartbeats succeed.
+
+Default poll interval is about **3 seconds**; heartbeat about **15 seconds**.
 
 ### 0.3.1
 
-- Removed local “last 10 messages” history UI (counters remain).
+- Removed local "last 10 messages" history UI (counters remain).
 - Boot receiver + task-removed / destroy restart + AlarmManager watchdog for background survival.
 - Optional per-customer `route_key` routing is handled server-side; agent unchanged for send payload.
-4. Start the agent service. Home should show **Online** / **Synced** when heartbeats succeed.
-
-Default poll interval is about **3 seconds**; heartbeat about **15 seconds**.
 
 ## Hide icon / reopen
 

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:prod": "tsc -b && VITE_BASE_PATH=/app/ VITE_API_BASE_URL=/api/v1 vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },

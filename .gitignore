@@ -46,6 +46,10 @@ backend/celerybeat-schedule.*
 # Android
 *.apk
 *.aab
+*.jks
+*.keystore
+android-agent/keystore.properties
+android-agent/keystore/
 android-agent/local.properties
 android-agent/.gradle/
 android-agent/.kotlin/
