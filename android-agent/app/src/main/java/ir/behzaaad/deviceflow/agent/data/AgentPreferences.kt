@@ -2,19 +2,8 @@ package ir.behzaaad.deviceflow.agent.data
 
 import android.content.Context
 import androidx.core.content.edit
-import org.json.JSONArray
-import org.json.JSONObject
 import java.security.MessageDigest
 import java.security.SecureRandom
-
-data class LocalMessage(
-    val id: String,
-    val direction: String, // out | in
-    val peer: String,
-    val body: String,
-    val status: String,
-    val atMs: Long,
-)
 
 class AgentPreferences(context: Context) {
     private val appContext = context.applicationContext
@@ -187,80 +176,10 @@ class AgentPreferences(context: Context) {
         } else if (status == "failed") {
             smsFailedCount += 1
         }
-        prependMessage(
-            LocalMessage(
-                id = messageId,
-                direction = "out",
-                peer = to,
-                body = body,
-                status = status,
-                atMs = System.currentTimeMillis(),
-            ),
-        )
     }
 
     fun recordInbound(from: String, body: String) {
         smsReceivedCount += 1
-        prependMessage(
-            LocalMessage(
-                id = "in-${System.currentTimeMillis()}",
-                direction = "in",
-                peer = from,
-                body = body,
-                status = "received",
-                atMs = System.currentTimeMillis(),
-            ),
-        )
-    }
-
-    fun recentMessages(limit: Int = 10): List<LocalMessage> = allMessages().take(limit)
-
-    fun allMessages(): List<LocalMessage> {
-        val raw = prefs.getString(KEY_RECENT_MSGS, "[]") ?: "[]"
-        return try {
-            val arr = JSONArray(raw)
-            buildList {
-                for (i in 0 until arr.length()) {
-                    val o = arr.getJSONObject(i)
-                    add(
-                        LocalMessage(
-                            id = o.optString("id"),
-                            direction = o.optString("direction"),
-                            peer = o.optString("peer"),
-                            body = o.optString("body"),
-                            status = o.optString("status"),
-                            atMs = o.optLong("atMs"),
-                        ),
-                    )
-                }
-            }
-        } catch (_: Exception) {
-            emptyList()
-        }
-    }
-
-    fun clearMessageHistory() {
-        prefs.edit { putString(KEY_RECENT_MSGS, "[]") }
-    }
-
-    private fun prependMessage(message: LocalMessage) {
-        val current = allMessages().toMutableList()
-        current.removeAll { it.id == message.id && message.id.isNotBlank() }
-        current.add(0, message)
-        val trimmed = current.take(MAX_HISTORY)
-        val arr = JSONArray()
-        trimmed.forEach { m ->
-            arr.put(
-                JSONObject()
-                    .put("id", m.id)
-                    .put("direction", m.direction)
-                    .put("peer", m.peer)
-                    .put("body", m.body.take(1000))
-                    .put("status", m.status)
-                    .put("atMs", m.atMs),
-            )
-        }
-        prefs.edit { putString(KEY_RECENT_MSGS, arr.toString()) }
     }
 
     private fun hashPasscode(passcode: String, salt: ByteArray): String {
@@ -298,13 +217,11 @@ class AgentPreferences(context: Context) {
         private const val KEY_LAST_HB_AT = "last_heartbeat_at"
         private const val KEY_LAST_HB_OK = "last_heartbeat_ok"
         private const val KEY_LAST_SYNC_ERR = "last_sync_error"
-        private const val KEY_RECENT_MSGS = "recent_messages_json"
         private const val KEY_LAUNCHER_HIDDEN = "launcher_hidden"
         private const val KEY_UI_LOCKED = "ui_locked"
         private const val KEY_PASSCODE_HASH = "passcode_hash"
         private const val KEY_PASSCODE_SALT = "passcode_salt"
         private const val KEY_DIALER_CODE = "dialer_code"
-        private const val MAX_HISTORY = 500
         const val DEFAULT_DIALER_CODE = "3323"
 
         fun isValidDialerCode(code: String): Boolean =

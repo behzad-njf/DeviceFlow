@@ -38,6 +38,7 @@ DeviceFlow pairs real phones with a multi-tenant control plane. Operators manage
 
 - **Device pairing** — generate a code in the dashboard; the phone (or mock agent) pairs and stays online via heartbeat
 - **SMS send / receive** — project routing, API keys, templates, bulk campaigns, inbox & contacts
+- **Optional customer routes** — map `route_key` (e.g. PizoGold customer UUID) → phone/SIM on a shared project; omit `route_key` to keep classic pool routing
 - **Live ops** — device health, queues, timeline, map (GPS from agent), remote commands
 - **USSD** — run carrier codes from the dashboard (agent + Accessibility on some OEMs)
 - **App security** — hide launcher icon, UI passcode lock, customizable secret dialer code (`*#*#CODE#*#*`)

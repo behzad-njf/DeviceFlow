@@ -6,10 +6,14 @@ import { ApiError } from '../../shared/api/client'
 import { listDevices, type Device } from '../../shared/api/devices'
 import {
   createProject,
+  createProjectRoute,
+  deleteProjectRoute,
+  listProjectRoutes,
   listProjects,
   setProjectDevices,
   type Project,
   type ProjectDeviceSettings,
+  type ProjectRouteBinding,
 } from '../../shared/api/projects'
 import { Button, Field, TextInput } from '../../shared/ui/Form'
 import { useAuthStore } from '../../features/auth/authStore'
@@ -54,6 +58,12 @@ export function ProjectsPage() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [routesByProject, setRoutesByProject] = useState<
+    Record<string, ProjectRouteBinding[]>
+  >({})
+  const [routeDrafts, setRouteDrafts] = useState<
+    Record<string, { route_key: string; label: string; device_id: string }>
+  >({})
 
   const pairedDevices = useMemo(
     () => devices.filter((d) => d.is_paired),
@@ -84,6 +94,17 @@ export function ProjectsPage() {
     const [p, d] = await Promise.all([listProjects(token), listDevices(token)])
     setProjects(p.results)
     setDevices(d.results)
+    const routeEntries = await Promise.all(
+      p.results.map(async (project) => {
+        try {
+          const res = await listProjectRoutes(token, project.id)
+          return [project.id, res.results] as const
+        } catch {
+          return [project.id, [] as ProjectRouteBinding[]] as const
+        }
+      }),
+    )
+    setRoutesByProject(Object.fromEntries(routeEntries))
   }, [token])
 
   useEffect(() => {
@@ -177,6 +198,72 @@ export function ProjectsPage() {
       ...prev,
       [deviceId]: { ...(prev[deviceId] ?? defaultDeviceSettings()), ...patch },
     }))
+  }
+
+  function routeDraft(projectId: string) {
+    return (
+      routeDrafts[projectId] ?? {
+        route_key: '',
+        label: '',
+        device_id: '',
+      }
+    )
+  }
+
+  function updateRouteDraft(
+    projectId: string,
+    patch: Partial<{ route_key: string; label: string; device_id: string }>,
+  ) {
+    setRouteDrafts((prev) => ({
+      ...prev,
+      [projectId]: { ...routeDraft(projectId), ...patch },
+    }))
+  }
+
+  async function addRoute(project: Project) {
+    if (!token) return
+    const draft = routeDraft(project.id)
+    const deviceId = draft.device_id || (project.devices || [])[0]?.device_id || ''
+    if (!draft.route_key.trim() || !deviceId) {
+      setError(t('common.error'))
+      return
+    }
+    setBusy(true)
+    setError(null)
+    setNotice(null)
+    try {
+      await createProjectRoute(token, project.id, {
+        route_key: draft.route_key.trim(),
+        device_id: deviceId,
+        label: draft.label.trim(),
+      })
+      setRouteDrafts((prev) => ({
+        ...prev,
+        [project.id]: { route_key: '', label: '', device_id: '' },
+      }))
+      setNotice(t('projects.routeAdded'))
+      await refresh()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('common.error'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function removeRoute(projectId: string, routeId: string) {
+    if (!token) return
+    setBusy(true)
+    setError(null)
+    setNotice(null)
+    try {
+      await deleteProjectRoute(token, projectId, routeId)
+      setNotice(t('projects.routeDeleted'))
+      await refresh()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t('common.error'))
+    } finally {
+      setBusy(false)
+    }
   }
 
   function formatPreferredSim(deviceId: string, slot: number | null) {
@@ -451,6 +538,90 @@ export function ProjectsPage() {
                     </p>
                   </div>
                 )}
+
+                {!editing && count > 0 ? (
+                  <div className="project-routes">
+                    <h3 className="project-section-title">{t('projects.routesTitle')}</h3>
+                    <p className="muted-text">{t('projects.routesHint')}</p>
+                    {(routesByProject[project.id] || []).length === 0 ? (
+                      <p className="muted-text">{t('projects.routesEmpty')}</p>
+                    ) : (
+                      <ul className="project-device-list">
+                        {(routesByProject[project.id] || []).map((route) => (
+                          <li key={route.id} className="project-device-row">
+                            <div className="project-device-main">
+                              <strong>
+                                <code>{route.route_key}</code>
+                                {route.label ? ` · ${route.label}` : ''}
+                              </strong>
+                              <span className="muted-text">
+                                {route.device_name}
+                                {route.preferred_sim_slot
+                                  ? ` · ${t('projects.simSlot', { slot: route.preferred_sim_slot })}`
+                                  : ''}
+                                {!route.is_active ? ` · ${t('projects.routeInactive')}` : ''}
+                              </span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              disabled={busy}
+                              onClick={() => void removeRoute(project.id, route.id)}
+                            >
+                              {t('projects.routeDelete')}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="toolbar project-create-grid" style={{ marginTop: 12 }}>
+                      <Field label={t('projects.routeKey')} htmlFor={`rk-${project.id}`}>
+                        <TextInput
+                          id={`rk-${project.id}`}
+                          value={routeDraft(project.id).route_key}
+                          onChange={(e) =>
+                            updateRouteDraft(project.id, { route_key: e.target.value })
+                          }
+                          placeholder="customer-uuid"
+                        />
+                      </Field>
+                      <Field label={t('projects.routeLabel')} htmlFor={`rl-${project.id}`}>
+                        <TextInput
+                          id={`rl-${project.id}`}
+                          value={routeDraft(project.id).label}
+                          onChange={(e) =>
+                            updateRouteDraft(project.id, { label: e.target.value })
+                          }
+                        />
+                      </Field>
+                      <Field label={t('projects.routeDevice')} htmlFor={`rd-${project.id}`}>
+                        <select
+                          id={`rd-${project.id}`}
+                          className="df-input"
+                          value={
+                            routeDraft(project.id).device_id || linked[0]?.device_id || ''
+                          }
+                          onChange={(e) =>
+                            updateRouteDraft(project.id, { device_id: e.target.value })
+                          }
+                        >
+                          {linked.map((d) => (
+                            <option key={d.device_id} value={d.device_id}>
+                              {d.name}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <Button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void addRoute(project)}
+                      >
+                        {t('projects.routeAdd')}
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
               </section>
             )
           })}

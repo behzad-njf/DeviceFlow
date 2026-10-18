@@ -1,0 +1,64 @@
+# DeviceFlow API — uvicorn on port 8000
+#
+# Install:
+#   sudo cp deploy/systemd/deviceflow-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now deviceflow-api.service
+#   sudo systemctl status deviceflow-api.service
+#
+# Logs:
+#   journalctl -u deviceflow-api -f
+#
+# Prerequisites:
+#   - Repo at /home/mrhib/DeviceFlow
+#   - venv at /home/mrhib/DeviceFlow/backend/.venv  (python -m venv .venv && pip install -r requirements.txt)
+#   - Env file at /home/mrhib/DeviceFlow/.env       (SECRET_KEY, ALLOWED_HOSTS, DATABASE_URL, …)
+#   - Migrations applied: .venv/bin/python manage.py migrate
+#
+# Nginx proxies https://smsgateway.behzaaad.ir/api|admin|ws → 127.0.0.1:8000
+
+[Unit]
+Description=DeviceFlow API (uvicorn)
+After=network-online.target
+Wants=network-online.target
+# Uncomment if Postgres/Redis are also systemd units on this host:
+# After=network-online.target postgresql.service redis-server.service
+# Requires=postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=mrhib
+Group=mrhib
+WorkingDirectory=/home/mrhib/DeviceFlow/backend
+
+# Root .env (same as docker-compose env_file). Adjust path if yours lives elsewhere.
+EnvironmentFile=-/home/mrhib/DeviceFlow/.env
+
+Environment=DJANGO_SETTINGS_MODULE=config.settings.production
+Environment=PYTHONUNBUFFERED=1
+
+# Bind localhost only — nginx terminates TLS and reverse-proxies.
+ExecStart=/home/mrhib/DeviceFlow/backend/.venv/bin/uvicorn config.asgi:application \
+    --host 127.0.0.1 \
+    --port 8000 \
+    --proxy-headers \
+    --forwarded-allow-ips=127.0.0.1 \
+    --timeout-keep-alive 30 \
+    --workers 2
+
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillMode=mixed
+
+# Hardening (safe defaults for a home-server API)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/mrhib/DeviceFlow/backend
+# Uncomment if you write media/static outside backend/:
+# ReadWritePaths=/home/mrhib/DeviceFlow/backend /var/lib/deviceflow
+
+[Install]
+WantedBy=multi-user.target

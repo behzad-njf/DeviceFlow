@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.projects.models import Project, ProjectDevice
+from apps.projects.models import Project, ProjectDevice, ProjectRouteBinding
 
 
 class ProjectDeviceSettingsSerializer(serializers.Serializer):
@@ -112,3 +112,41 @@ class ProjectDeviceSerializer(serializers.Serializer):
     device_settings = serializers.DictField(
         child=ProjectDeviceSettingsSerializer(), required=False
     )
+
+
+class ProjectRouteBindingSerializer(serializers.ModelSerializer):
+    device_id = serializers.UUIDField(source="device.id", read_only=True)
+    device_name = serializers.CharField(source="device.name", read_only=True)
+
+    class Meta:
+        model = ProjectRouteBinding
+        fields = (
+            "id",
+            "route_key",
+            "device_id",
+            "device_name",
+            "preferred_sim_slot",
+            "sim_fallback_enabled",
+            "label",
+            "is_active",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "device_id", "device_name", "created_at", "updated_at")
+
+
+class ProjectRouteBindingWriteSerializer(serializers.Serializer):
+    route_key = serializers.CharField(max_length=128)
+    device_id = serializers.UUIDField()
+    preferred_sim_slot = serializers.IntegerField(
+        required=False, allow_null=True, min_value=1, max_value=2
+    )
+    sim_fallback_enabled = serializers.BooleanField(required=False, default=True)
+    label = serializers.CharField(required=False, allow_blank=True, max_length=255)
+    is_active = serializers.BooleanField(required=False, default=True)
+
+    def validate_route_key(self, value: str) -> str:
+        key = value.strip()
+        if not key:
+            raise serializers.ValidationError("route_key is required")
+        return key

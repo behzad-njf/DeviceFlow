@@ -141,8 +141,14 @@ def _select_sim_for_device(
     preferred_operator: str | None,
     sim_slot_index: int | None,
     tenant_default_quota: int,
+    preferred_sim_slot_override: int | None = None,
+    sim_fallback_override: bool | None = None,
 ) -> SimSlot | None:
     preferred_sim_slot, sim_fallback_enabled = _project_device_prefs(project, device)
+    if preferred_sim_slot_override is not None:
+        preferred_sim_slot = preferred_sim_slot_override
+    if sim_fallback_override is not None:
+        sim_fallback_enabled = sim_fallback_override
     return _select_sim(
         device,
         preferred_operator=preferred_operator,
@@ -177,6 +183,8 @@ def route_message(
     device_ref: str | None = None,
     sim_slot_index: int | None = None,
     exclude_device_ids: set | None = None,
+    preferred_sim_slot_override: int | None = None,
+    sim_fallback_override: bool | None = None,
 ) -> RouteResult:
     config = get_or_create_config(tenant)
     number = operators.normalize_number(to_number)
@@ -200,6 +208,8 @@ def route_message(
             preferred_operator=preferred_operator,
             sim_slot_index=sim_slot_index,
             tenant_default_quota=sim_quota_default,
+            preferred_sim_slot_override=preferred_sim_slot_override,
+            sim_fallback_override=sim_fallback_override,
         )
         return RouteResult(device, sim, strategy, operator, forced=True)
 

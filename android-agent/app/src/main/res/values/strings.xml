@@ -126,7 +126,7 @@
     <string name="help_started_body">1. Open the DeviceFlow dashboard and create a pairing code.\n2. Enter your server URL and the code here.\n3. Grant SMS, Phone, and Notifications permissions.\n4. Start the agent service and confirm Online / Synced on the home screen.\n5. Attach this phone to a project, then send a test SMS.</string>
     <string name="help_online_title">Keep the agent online</string>
     <string name="help_online_blurb">Battery, autostart, and the foreground notification.</string>
-    <string name="help_online_body">Leave the agent service running. Disable battery optimization for DeviceFlow. On Xiaomi, enable Autostart and lock the app in Recents. Do not swipe away the ongoing notification — it means the gateway is alive.</string>
+    <string name="help_online_body">Leave the agent service running. Disable battery optimization for DeviceFlow. On Xiaomi/Huawei/Oppo, enable Autostart (or “launch automatically”) and lock the app in Recents. The agent also restarts after reboot via a boot receiver and a 15‑minute watchdog. Do not stop the ongoing notification unless you intend to take the gateway offline.</string>
     <string name="help_dualsim_title">Dual-SIM phones</string>
     <string name="help_dualsim_blurb">How SIMs appear in the dashboard.</string>
     <string name="help_dualsim_body">Grant Phone / Phone numbers permissions so both SIMs are reported. The dashboard can pick a SIM when sending or running USSD. Refresh SIMs from the device detail page if a SIM was swapped.</string>

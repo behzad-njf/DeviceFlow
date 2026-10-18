@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from apps.devices.models import Device, DeviceEvent, SimSlot
 from apps.messaging.models import InboundMessage, Message, MessageAttempt
-from apps.projects.models import Project
+from apps.projects.models import Project, ProjectDevice, ProjectRouteBinding
 from apps.routing.exceptions import RateLimitExceeded, RoutingError
 from apps.messaging.services.templates import IdempotencyConflict
 from apps.routing.services.engine import get_or_create_config, route_message
@@ -44,6 +44,44 @@ class MessageService:
         return result.device
 
     @staticmethod
+    def resolve_route_binding(
+        *, project: Project | None, route_key: str | None
+    ) -> ProjectRouteBinding | None:
+        key = (route_key or "").strip()
+        if not key:
+            return None
+        if project is None:
+            raise RoutingError(
+                code="ROUTE_NOT_CONFIGURED",
+                message="route_key requires a project (API key or project field)",
+            )
+        binding = (
+            ProjectRouteBinding.objects.filter(
+                project=project, route_key=key, is_active=True
+            )
+            .select_related("device")
+            .first()
+        )
+        if binding is None:
+            raise RoutingError(
+                code="ROUTE_NOT_CONFIGURED",
+                message=f"No active phone route for route_key={key}",
+            )
+        if not ProjectDevice.objects.filter(
+            project=project, device_id=binding.device_id
+        ).exists():
+            raise RoutingError(
+                code="ROUTE_NOT_CONFIGURED",
+                message="Route device is not attached to this project",
+            )
+        if not binding.device.is_paired or binding.device.status == Device.Status.DISABLED:
+            raise RoutingError(
+                code="ROUTE_DEVICE_UNAVAILABLE",
+                message="Route device is not available",
+            )
+        return binding
+
+    @staticmethod
     @transaction.atomic
     def enqueue(
         *,
@@ -54,6 +92,7 @@ class MessageService:
         device: Device | None = None,
         device_ref: str | None = None,
         sim_slot_index: int | None = None,
+        route_key: str | None = None,
         mode: str = Message.Mode.GENERAL,
         client_ref: str = "",
         meta: dict | None = None,
@@ -95,12 +134,29 @@ class MessageService:
             if jitter_at is not None:
                 scheduled_at = jitter_at
 
+        route_key_clean = (route_key or "").strip()
+        binding = None
+        preferred_sim_override = None
+        sim_fallback_override = None
+        # Explicit device pin wins over route_key.
+        if device is None and not device_ref and route_key_clean:
+            binding = MessageService.resolve_route_binding(
+                project=project, route_key=route_key_clean
+            )
+            device = binding.device
+            preferred_sim_override = binding.preferred_sim_slot
+            sim_fallback_override = binding.sim_fallback_enabled
+
         if scheduled_at and scheduled_at > timezone.now():
             message_meta = {
                 **(meta or {}),
                 "scheduled": True,
                 "mode_priority": priority,
             }
+            if route_key_clean:
+                message_meta["route_key"] = route_key_clean
+            if binding is not None:
+                message_meta["route_binding_id"] = str(binding.id)
             message = Message.objects.create(
                 tenant=tenant,
                 project=project,
@@ -133,6 +189,8 @@ class MessageService:
             project=project,
             device_ref=pin,
             sim_slot_index=sim_slot_index,
+            preferred_sim_slot_override=preferred_sim_override,
+            sim_fallback_override=sim_fallback_override,
         )
         if result.device is None:
             raise RoutingError(
@@ -209,6 +267,10 @@ class MessageService:
                 "reason": result.reason,
             },
         }
+        if route_key_clean:
+            message_meta["route_key"] = route_key_clean
+        if binding is not None:
+            message_meta["route_binding_id"] = str(binding.id)
         message = Message.objects.create(
             tenant=tenant,
             project=project,

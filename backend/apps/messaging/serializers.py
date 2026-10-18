@@ -49,6 +49,7 @@ class SendMessageSerializer(serializers.Serializer):
     vars = serializers.DictField(child=serializers.CharField(), required=False)
     project = serializers.CharField(required=False, allow_blank=True)
     device = serializers.CharField(required=False, allow_blank=True)
+    route_key = serializers.CharField(required=False, allow_blank=True, max_length=128)
     mode = serializers.ChoiceField(
         choices=Message.Mode.choices, required=False, default=Message.Mode.GENERAL
     )

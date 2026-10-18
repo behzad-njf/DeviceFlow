@@ -38,6 +38,13 @@ Or open this folder in Android Studio → **Sync Project with Gradle Files** →
 1. Start the DeviceFlow API and dashboard; create a pairing code under **Devices**.
 2. On the phone, enter `https://your-host/api/v1` (or `http://LAN_IP:8000/api/v1` for local) and the code.
 3. Grant SMS, Phone, Notifications, and related permissions; disable battery optimization when prompted.
+4. On Xiaomi/Huawei/Oppo, enable **Autostart** and lock the app in Recents. The agent starts after reboot and a 15‑minute watchdog restarts the foreground service if the OS kills it.
+
+### 0.3.1
+
+- Removed local “last 10 messages” history UI (counters remain).
+- Boot receiver + task-removed / destroy restart + AlarmManager watchdog for background survival.
+- Optional per-customer `route_key` routing is handled server-side; agent unchanged for send payload.
 4. Start the agent service. Home should show **Online** / **Synced** when heartbeats succeed.
 
 Default poll interval is about **3 seconds**; heartbeat about **15 seconds**.

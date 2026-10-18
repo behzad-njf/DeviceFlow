@@ -67,3 +67,51 @@ export function setProjectDevices(
     },
   })
 }
+
+export type ProjectRouteBinding = {
+  id: string
+  route_key: string
+  device_id: string
+  device_name: string
+  preferred_sim_slot: number | null
+  sim_fallback_enabled: boolean
+  label: string
+  is_active: boolean
+  created_at?: string
+  updated_at?: string
+}
+
+export type ProjectRoutePayload = {
+  route_key: string
+  device_id: string
+  preferred_sim_slot?: number | null
+  sim_fallback_enabled?: boolean
+  label?: string
+  is_active?: boolean
+}
+
+export function listProjectRoutes(token: string, projectId: string) {
+  return apiRequest<{ results: ProjectRouteBinding[] }>(
+    `/projects/${projectId}/routes/`,
+    { token },
+  )
+}
+
+export function createProjectRoute(
+  token: string,
+  projectId: string,
+  payload: ProjectRoutePayload,
+) {
+  return apiRequest<ProjectRouteBinding>(`/projects/${projectId}/routes/`, {
+    method: 'POST',
+    token,
+    body: payload,
+  })
+}
+
+export function deleteProjectRoute(token: string, projectId: string, routeId: string) {
+  return apiRequest<void>(`/projects/${projectId}/routes/${routeId}/`, {
+    method: 'DELETE',
+    token,
+  })
+}

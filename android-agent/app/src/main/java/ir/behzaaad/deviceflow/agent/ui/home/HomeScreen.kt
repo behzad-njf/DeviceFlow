@@ -4,10 +4,8 @@ import android.os.SystemClock
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -33,27 +31,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import ir.behzaaad.deviceflow.agent.BuildConfig
 import ir.behzaaad.deviceflow.agent.R
 import ir.behzaaad.deviceflow.agent.data.AgentPreferences
-import ir.behzaaad.deviceflow.agent.data.LocalMessage
 import ir.behzaaad.deviceflow.agent.service.AgentService
 import ir.behzaaad.deviceflow.agent.ui.components.SectionCard
 import ir.behzaaad.deviceflow.agent.ui.components.StatTile
 import ir.behzaaad.deviceflow.agent.ui.components.StatusPill
-import java.text.DateFormat
-import java.util.Date
 
 @Composable
 fun HomeScreen(
     onOpenPermissions: () -> Unit,
     onOpenBattery: () -> Unit,
     onOpenHelp: () -> Unit,
-    onOpenMessages: () -> Unit,
     onOpenSecurity: () -> Unit,
     onLockNow: () -> Unit,
     onUnpair: () -> Unit,
@@ -63,7 +56,6 @@ fun HomeScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     var tick by remember { mutableLongStateOf(0L) }
     var serviceRunning by remember { mutableStateOf(AgentService.isRunning()) }
-    var messages by remember { mutableStateOf(prefs.recentMessages()) }
     var passcodeSet by remember { mutableStateOf(prefs.passcodeSet) }
 
     DisposableEffect(lifecycleOwner) {
@@ -71,7 +63,6 @@ fun HomeScreen(
             if (event == Lifecycle.Event.ON_RESUME) {
                 tick = SystemClock.elapsedRealtime()
                 serviceRunning = AgentService.isRunning()
-                messages = prefs.recentMessages()
                 passcodeSet = prefs.passcodeSet
             }
         }
@@ -158,7 +149,7 @@ fun HomeScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 StatTile(
                     title = stringResource(R.string.stat_sent),
@@ -178,25 +169,6 @@ fun HomeScreen(
             }
 
             SectionCard(title = stringResource(R.string.home_service_title)) {
-                Text(
-                    text = if (serviceRunning) {
-                        stringResource(R.string.home_service_running)
-                    } else {
-                        stringResource(R.string.home_service_stopped)
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                if (prefs.lastHeartbeatAtMs > 0) {
-                    Text(
-                        text = stringResource(
-                            R.string.home_last_sync,
-                            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-                                .format(Date(prefs.lastHeartbeatAtMs)),
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-                    )
-                }
                 if (!prefs.lastHeartbeatOk && prefs.lastSyncError.isNotBlank()) {
                     Text(
                         text = prefs.lastSyncError,
@@ -230,30 +202,11 @@ fun HomeScreen(
                         onClick = {
                             tick = SystemClock.elapsedRealtime()
                             serviceRunning = AgentService.isRunning()
-                            messages = prefs.recentMessages()
                         },
                         modifier = Modifier.weight(1f),
                     ) {
                         Text(stringResource(R.string.refresh_status))
                     }
-                }
-            }
-
-            SectionCard(title = stringResource(R.string.home_recent_title)) {
-                if (messages.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.home_recent_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-                    )
-                } else {
-                    messages.forEach { msg ->
-                        MessageRow(msg)
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
-                }
-                OutlinedButton(onClick = onOpenMessages, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.nav_messages))
                 }
             }
 
@@ -282,42 +235,5 @@ fun HomeScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun MessageRow(message: LocalMessage) {
-    val dir = if (message.direction == "in") {
-        stringResource(R.string.msg_in)
-    } else {
-        stringResource(R.string.msg_out)
-    }
-    val whenText = DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(message.atMs))
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = "$dir · ${message.peer}",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = "${message.status} · $whenText",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            )
-        }
-        Text(
-            text = message.body.ifBlank { "—" },
-            style = MaterialTheme.typography.bodySmall,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-        )
     }
 }

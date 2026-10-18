@@ -6,6 +6,7 @@ from .views_apikeys import (
     ProjectApiKeyListCreateView,
     ProjectApiKeyRevokeView,
 )
+from .views_routes import ProjectRouteDetailView, ProjectRouteListCreateView
 
 urlpatterns = [
     path("projects/", ProjectListCreateView.as_view(), name="projects-list"),
@@ -14,6 +15,16 @@ urlpatterns = [
         "projects/<uuid:project_id>/devices/",
         ProjectDevicesView.as_view(),
         name="projects-devices",
+    ),
+    path(
+        "projects/<uuid:project_id>/routes/",
+        ProjectRouteListCreateView.as_view(),
+        name="projects-routes",
+    ),
+    path(
+        "projects/<uuid:project_id>/routes/<uuid:route_id>/",
+        ProjectRouteDetailView.as_view(),
+        name="projects-routes-detail",
     ),
     path(
         "projects/<uuid:project_id>/api-keys/",

@@ -25,13 +25,14 @@ import androidx.lifecycle.LifecycleEventObserver
 import ir.behzaaad.deviceflow.agent.data.AgentPreferences
 import ir.behzaaad.deviceflow.agent.security.AppSecurityEvents
 import ir.behzaaad.deviceflow.agent.security.LauncherVisibility
+import ir.behzaaad.deviceflow.agent.service.AgentKeepAlive
+import ir.behzaaad.deviceflow.agent.service.AgentService
 import ir.behzaaad.deviceflow.agent.ui.battery.BatteryOptimizationScreen
 import ir.behzaaad.deviceflow.agent.ui.help.HelpScreen
 import ir.behzaaad.deviceflow.agent.ui.help.HelpTopic
 import ir.behzaaad.deviceflow.agent.ui.help.HelpTopicScreen
 import ir.behzaaad.deviceflow.agent.ui.home.HomeScreen
 import ir.behzaaad.deviceflow.agent.ui.lock.LockScreen
-import ir.behzaaad.deviceflow.agent.ui.messages.MessageHistoryScreen
 import ir.behzaaad.deviceflow.agent.ui.pairing.PairingScreen
 import ir.behzaaad.deviceflow.agent.ui.permissions.PermissionsScreen
 import ir.behzaaad.deviceflow.agent.ui.security.SecuritySettingsScreen
@@ -44,7 +45,6 @@ private sealed class AppScreen {
     data object Permissions : AppScreen()
     data object Battery : AppScreen()
     data object Help : AppScreen()
-    data object Messages : AppScreen()
     data object Security : AppScreen()
     data class HelpDetail(val topic: HelpTopic) : AppScreen()
 }
@@ -55,6 +55,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val prefsBootstrap = AgentPreferences(this)
         LauncherVisibility.apply(this, prefsBootstrap)
+        if (prefsBootstrap.isPaired) {
+            AgentService.start(this)
+            AgentKeepAlive.schedule(this)
+        }
         setContent {
             DeviceFlowTheme {
                 // Keep content clear of status bar + gesture/nav bar with edge-to-edge.
@@ -117,7 +121,6 @@ class MainActivity : ComponentActivity() {
                                     onOpenPermissions = { screen = AppScreen.Permissions },
                                     onOpenBattery = { screen = AppScreen.Battery },
                                     onOpenHelp = { screen = AppScreen.Help },
-                                    onOpenMessages = { screen = AppScreen.Messages },
                                     onOpenSecurity = { screen = AppScreen.Security },
                                     onLockNow = { locked = true },
                                     onUnpair = { screen = AppScreen.Pairing },
@@ -145,10 +148,6 @@ class MainActivity : ComponentActivity() {
                                     onBack = {
                                         screen = if (prefs.isPaired) AppScreen.Home else AppScreen.Pairing
                                     },
-                                )
-                            AppScreen.Messages ->
-                                MessageHistoryScreen(
-                                    onBack = { screen = AppScreen.Home },
                                 )
                             AppScreen.Security ->
                                 SecuritySettingsScreen(

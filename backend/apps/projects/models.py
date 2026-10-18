@@ -57,6 +57,54 @@ class ProjectDevice(models.Model):
         ordering = ["-priority", "created_at"]
 
 
+class ProjectRouteBinding(models.Model):
+    """
+    Optional per-caller phone route inside a project.
+
+    Used by shared API keys (e.g. PizoGold) so each external customer_id
+    sends from its own device/SIM. When route_key is omitted on send,
+    normal project routing applies.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="route_bindings"
+    )
+    route_key = models.CharField(
+        max_length=128,
+        help_text="External caller id (e.g. PizoGold customer UUID).",
+    )
+    device = models.ForeignKey(
+        "devices.Device",
+        on_delete=models.CASCADE,
+        related_name="route_bindings",
+    )
+    preferred_sim_slot = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Preferred SIM slot (1 or 2) for this route.",
+    )
+    sim_fallback_enabled = models.BooleanField(
+        default=True,
+        help_text="Allow another SIM if the preferred slot is unavailable.",
+    )
+    label = models.CharField(max_length=255, blank=True, default="")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("project", "route_key")
+        ordering = ["route_key"]
+        indexes = [
+            models.Index(fields=["project", "route_key"]),
+        ]
+
+    def __str__(self) -> str:
+        label = self.label or self.route_key
+        return f"{label} → {self.device_id}"
+
+
 class ApiKey(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(

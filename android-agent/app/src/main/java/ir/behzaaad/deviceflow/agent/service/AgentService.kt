@@ -34,23 +34,40 @@ class AgentService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
+            stopRequested.set(true)
+            AgentKeepAlive.cancel(this)
+            running.set(false)
             stopSelf()
             return START_NOT_STICKY
         }
+        stopRequested.set(false)
         startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.notif_running)))
         DeviceLocation.start(this)
         val prefs = AgentPreferences(this)
         LauncherVisibility.apply(this, prefs)
+        AgentKeepAlive.schedule(this)
         if (running.compareAndSet(false, true)) {
             executor.execute { loop() }
         }
         return START_STICKY
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        // Swiping the task away must not kill the gateway when still paired.
+        if (!stopRequested.get() && AgentPreferences(this).isPaired) {
+            AgentKeepAlive.ensureRunning(applicationContext)
+        }
+    }
+
     override fun onDestroy() {
+        val shouldRestart = !stopRequested.get() && AgentPreferences(this).isPaired
         running.set(false)
         DeviceLocation.stop(this)
         super.onDestroy()
+        if (shouldRestart) {
+            AgentKeepAlive.ensureRunning(applicationContext)
+        }
     }
 
     private fun loop() {
@@ -240,6 +257,7 @@ class AgentService : Service() {
         private const val NOTIFICATION_ID = 42
         const val ACTION_STOP = "ir.behzaaad.deviceflow.agent.STOP"
         private val running = AtomicBoolean(false)
+        private val stopRequested = AtomicBoolean(false)
 
         val AGENT_CAPABILITIES = listOf(
             "sms.send",
@@ -264,13 +282,17 @@ class AgentService : Service() {
         fun isRunning(): Boolean = running.get()
 
         fun start(context: Context) {
+            stopRequested.set(false)
             ContextCompat.startForegroundService(
-                context,
-                Intent(context, AgentService::class.java),
+                context.applicationContext,
+                Intent(context.applicationContext, AgentService::class.java),
             )
+            AgentKeepAlive.schedule(context.applicationContext)
         }
 
         fun stop(context: Context) {
+            stopRequested.set(true)
+            AgentKeepAlive.cancel(context.applicationContext)
             context.startService(
                 Intent(context, AgentService::class.java).setAction(ACTION_STOP),
             )

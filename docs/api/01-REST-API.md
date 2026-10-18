@@ -87,6 +87,16 @@ Soft-delete preferred
 
 Replace attachments `{ device_ids, priorities? }`
 
+### `GET /projects/{id}/routes`
+
+List optional customer→phone bindings (`route_key` → device).
+
+### `POST /projects/{id}/routes`
+
+`{ route_key, device_id, preferred_sim_slot?, sim_fallback_enabled?, label?, is_active? }`
+
+### `PATCH /projects/{id}/routes/{route_id}` / `DELETE /projects/{id}/routes/{route_id}`
+
 ---
 
 ## 6. API Keys
@@ -171,6 +181,7 @@ REST fallback if WS down
   "text": "Hello",
   "project": "otp-service",
   "device": null,
+  "route_key": null,
   "mode": "otp",
   "sim_slot": null,
   "scheduled_at": null,
@@ -180,6 +191,10 @@ REST fallback if WS down
 ```
 
 Either `project` (slug/id) via key context, or explicit `device` name/id.
+
+Optional `route_key`: looks up a `ProjectRouteBinding` on the resolved project and forces that device/SIM.
+Omit it to keep normal project-pool routing. Unknown `route_key` → `422 ROUTE_NOT_CONFIGURED`.
+Explicit `device` wins over `route_key`.
 
 Response `202`:
 

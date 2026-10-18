@@ -348,7 +348,18 @@
     "simSlot": "SIM {{slot}}",
     "simFallback": "Use another SIM if preferred is unavailable",
     "simFallbackOff": "strict SIM only",
-    "simHint": "For dual-SIM phones shared across projects, pick a default SIM per project. Disable fallback to fail sends when that SIM is unavailable."
+    "simHint": "For dual-SIM phones shared across projects, pick a default SIM per project. Disable fallback to fail sends when that SIM is unavailable.",
+    "routesTitle": "Customer phone routes",
+    "routesHint": "Optional: map an external route_key (e.g. PizoGold customer UUID) to a phone on this project. Sends without route_key keep using the project pool.",
+    "routesEmpty": "No customer routes yet.",
+    "routeKey": "Route key (customer id)",
+    "routeLabel": "Label",
+    "routeDevice": "Phone",
+    "routeAdd": "Add route",
+    "routeAdded": "Customer route saved",
+    "routeDeleted": "Customer route removed",
+    "routeDelete": "Remove",
+    "routeInactive": "inactive"
   },
   "routing": {
     "title": "Routing & reliability",
